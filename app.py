@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -7,19 +7,18 @@ import yfinance as yf
 
 # Page Configuration
 st.set_page_config(
-    page_title="Grow More Trading Institute - RRG Analytics",
+    page_title="Grow More Trading Institute - Advanced RRG Analytics",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling (Dark Theme, Blinking Live Dot & Institute Branding)
+# Custom Dark Theme Styling & Institute Branding
 st.markdown(
     """
     <style>
     .stApp { background-color: #0b0f19; color: #f3f4f6; }
     
-    /* Branding Banner Flex Container */
     .brand-header {
         background: linear-gradient(90deg, #1e3a8a 0%, #0f172a 100%);
         padding: 18px 24px;
@@ -36,7 +35,6 @@ st.markdown(
     .brand-title { font-size: 1.8rem; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.5px; }
     .brand-subtitle { font-size: 0.95rem; color: #9ca3af; margin-top: 4px; }
     
-    /* Live Indicator & Clock Styling */
     .live-container {
         display: flex;
         align-items: center;
@@ -80,7 +78,7 @@ st.markdown(
         font-family: monospace;
     }
 
-    /* Status Badges */
+    /* Badges & Setup Cards */
     .status-badge {
         padding: 4px 10px;
         border-radius: 6px;
@@ -92,12 +90,24 @@ st.markdown(
     .bg-improving { background-color: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
     .bg-weakening { background-color: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
     .bg-lagging { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
-
-    /* 52W High Badges */
     .bg-near-high { background-color: rgba(236, 72, 153, 0.2); color: #ec4899; border: 1px solid #ec4899; }
     .bg-normal-high { background-color: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid #4b5563; }
 
-    /* Footer Branding */
+    .setup-card-long {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid #10b981;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    .setup-card-short {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid #ef4444;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
     .footer-text {
         text-align: center;
         color: #6b7280;
@@ -111,13 +121,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header Branding Banner with Blinking LIVE Badge & Realtime Clock
+# Header Branding Banner
 st.markdown(
     """
     <div class="brand-header">
         <div>
             <div class="brand-title">GROW MORE TRADING INSTITUTE</div>
-            <div class="brand-subtitle">Real-time NSE 14 Sectors & Stock Rotation RRG Matrix</div>
+            <div class="brand-subtitle">Real-Time Sector RRG, Animated Rotations & AI Trade Intelligence</div>
         </div>
         <div class="live-container">
             <div class="live-badge">
@@ -152,7 +162,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 14 Primary NSE Sectors & Benchmark Mapping
+# 14 Primary NSE Sectors Mapping
 SECTOR_MAP = {
     "Nifty Bank": {
         "index": "^NSEBANK",
@@ -308,10 +318,10 @@ SECTOR_MAP = {
     },
 }
 
-BENCHMARK_SYMBOL = "^NSEI"  # Nifty 50 Index
+BENCHMARK_SYMBOL = "^NSEI"  # Nifty 50 Benchmark
 
 # Sidebar Controls
-st.sidebar.header("⚙️ RRG Parameters")
+st.sidebar.header("⚙️ RRG Controls")
 timeframe = st.sidebar.selectbox(
     "Select Timeframe",
     options=["1d", "1wk"],
@@ -339,20 +349,16 @@ selected_sector_for_stocks = st.sidebar.selectbox(
 )
 
 
-# Helper Function for RRG Calculation
+# RRG Metric Calculation Engine
 def calculate_rrg_metrics(data_df, item_ticker, bench_ticker, period_len=14):
     if item_ticker not in data_df.columns or bench_ticker not in data_df.columns:
         return None
 
-    # 1. Raw RS
     rs = (data_df[item_ticker] / data_df[bench_ticker]) * 100
-
-    # 2. RS-Ratio
     rs_mean = rs.rolling(window=period_len).mean()
     rs_std = rs.rolling(window=period_len).std()
     rs_ratio = 100 + ((rs - rs_mean) / (rs_std + 1e-6)) * 10
 
-    # 3. RS-Momentum
     ratio_mean = rs_ratio.rolling(window=period_len).mean()
     ratio_std = rs_ratio.rolling(window=period_len).std()
     rs_momentum = 100 + ((rs_ratio - ratio_mean) / (ratio_std + 1e-6)) * 10
@@ -364,7 +370,7 @@ def calculate_rrg_metrics(data_df, item_ticker, bench_ticker, period_len=14):
 def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
     all_tickers = list(items_dict.values()) + [benchmark_ticker_sym]
     raw_data = yf.download(
-        all_tickers, period="1y", interval=interval, progress=False
+        all_tickers, period="2y", interval=interval, progress=False
     )
 
     if isinstance(raw_data.columns, pd.MultiIndex):
@@ -382,7 +388,6 @@ def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
     for name, ticker in items_dict.items():
         metrics = calculate_rrg_metrics(df_close, ticker, benchmark_ticker_sym)
         if metrics is not None and not metrics.empty:
-            # 52-Week High & CMP Calculations
             if ticker in df_close.columns and ticker in df_high.columns:
                 cmp = df_close[ticker].dropna().iloc[-1]
                 high_52w = df_high[ticker].dropna().max()
@@ -392,9 +397,11 @@ def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
 
             rrg_results[name] = {
                 "metrics": metrics,
+                "prices": df_close[ticker].dropna(),
                 "cmp": round(cmp, 2),
                 "high_52w": round(high_52w, 2),
                 "dist_52w": round(dist_52w, 2),
+                "ticker": ticker,
             }
 
     return rrg_results
@@ -475,7 +482,6 @@ def render_rrg_chart(rrg_data_dict, title_text):
         mom_change = head_y - y_vals[-2] if len(y_vals) > 1 else 0
         trend_icon = "⬆️ Up" if mom_change > 0 else "⬇️ Down"
 
-        # Check if near 52W High based on user threshold
         is_near = dist_52w <= high_threshold
         near_high_status = (
             f"🔥 YES ({dist_52w}%)" if is_near else f"NO ({dist_52w}%)"
@@ -497,7 +503,6 @@ def render_rrg_chart(rrg_data_dict, title_text):
             "NearBadgeClass": near_badge_cls,
         })
 
-        # Tail Line
         fig.add_trace(
             go.Scatter(
                 x=x_vals,
@@ -509,7 +514,6 @@ def render_rrg_chart(rrg_data_dict, title_text):
             )
         )
 
-        # Head Marker
         fig.add_trace(
             go.Scatter(
                 x=[head_x],
@@ -707,15 +711,420 @@ def render_styled_table(data_frame, col_name="Sector / Stock Name"):
 
 
 # -------------------------------------------------------------------
-# MAIN DASHBOARD TABS (1. SECTORS RRG | 2. STOCKS DRILL-DOWN)
+# FEATURE 1: ANIMATED RRG ROTATION GENERATOR
+# -------------------------------------------------------------------
+def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
+    # Find common date index across all sectors
+    all_dates = None
+    for item in sector_rrg_dict.values():
+        df_m = item["metrics"]
+        if all_dates is None:
+            all_dates = set(df_m.index)
+        else:
+            all_dates = all_dates.intersection(set(df_m.index))
+
+    if not all_dates:
+        st.warning("Not enough overlapping historical data for animation.")
+        return
+
+    sorted_dates = sorted(list(all_dates))[-lookback_periods:]
+    if len(sorted_dates) < 3:
+        st.warning("Insufficient dates for animation window.")
+        return
+
+    colors = [
+        "#10B981",
+        "#3B82F6",
+        "#EF4444",
+        "#F59E0B",
+        "#8B5CF6",
+        "#EC4899",
+        "#14B8A6",
+        "#F97316",
+        "#6366F1",
+        "#06B6D4",
+        "#A855F7",
+        "#EAB308",
+        "#84CC16",
+        "#F43F5E",
+    ]
+
+    # Initial frame data setup
+    init_date = sorted_dates[0]
+    fig = go.Figure()
+
+    for idx, (name, item) in enumerate(sector_rrg_dict.items()):
+        df = item["metrics"]
+        color = colors[idx % len(colors)]
+        if init_date in df.index:
+            rx = df.loc[init_date, "ratio"]
+            ry = df.loc[init_date, "momentum"]
+            fig.add_trace(
+                go.Scatter(
+                    x=[rx],
+                    y=[ry],
+                    mode="markers+text",
+                    name=name,
+                    text=[name],
+                    textposition="top center",
+                    marker=dict(size=12, color=color),
+                )
+            )
+
+    # Build Animation Frames
+    frames = []
+    for dt in sorted_dates:
+        frame_data = []
+        date_str = pd.to_datetime(dt).strftime("%d %b %Y")
+        for idx, (name, item) in enumerate(sector_rrg_dict.items()):
+            df = item["metrics"]
+            color = colors[idx % len(colors)]
+            if dt in df.index:
+                # Get historical tail up to dt
+                sub_df = df.loc[:dt].tail(4)
+                x_tail = sub_df["ratio"].values
+                y_tail = sub_df["momentum"].values
+                frame_data.append(
+                    go.Scatter(
+                        x=x_tail,
+                        y=y_tail,
+                        mode="lines+markers+text",
+                        name=name,
+                        text=[""] * (len(x_tail) - 1) + [name],
+                        textposition="top center",
+                        marker=dict(
+                            size=[6] * (len(x_tail) - 1) + [12], color=color
+                        ),
+                        line=dict(color=color, width=2),
+                    )
+                )
+        frames.append(
+            go.Frame(data=frame_data, name=date_str, layout=dict(title=f"🎬 RRG Sector Rotation Date: {date_str}"))
+        )
+
+    fig.frames = frames
+
+    fig.update_layout(
+        title="🎬 Interactive Sector Rotation Animation (Click Play below)",
+        paper_bgcolor="#111827",
+        plot_bgcolor="#111827",
+        height=620,
+        xaxis=dict(
+            title="RS-Ratio",
+            range=[94, 106],
+            gridcolor="#1F2937",
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title="RS-Momentum",
+            range=[94, 106],
+            gridcolor="#1F2937",
+            zeroline=False,
+        ),
+        shapes=[
+            dict(
+                type="line",
+                x0=100,
+                x1=100,
+                y0=90,
+                y1=110,
+                line=dict(color="#4B5563", width=1.5, dash="dash"),
+            ),
+            dict(
+                type="line",
+                x0=90,
+                x1=110,
+                y0=100,
+                y1=100,
+                line=dict(color="#4B5563", width=1.5, dash="dash"),
+            ),
+        ],
+        updatemenus=[
+            dict(
+                type="buttons",
+                showactive=False,
+                y=0.0,
+                x=0.0,
+                xanchor="left",
+                yanchor="top",
+                pad=dict(t=10, r=10),
+                buttons=[
+                    dict(
+                        label="▶️ Play Rotation",
+                        method="animate",
+                        args=[
+                            None,
+                            dict(
+                                frame=dict(duration=600, redraw=True),
+                                fromcurrent=True,
+                                mode="immediate",
+                            ),
+                        ],
+                    ),
+                    dict(
+                        label="⏸️ Pause",
+                        method="animate",
+                        args=[
+                            [None],
+                            dict(
+                                frame=dict(duration=0, redraw=False),
+                                mode="immediate",
+                            ),
+                        ],
+                    ),
+                ],
+            )
+        ],
+        sliders=[
+            dict(
+                steps=[
+                    dict(
+                        method="animate",
+                        args=[
+                            [f.name],
+                            dict(
+                                mode="immediate",
+                                frame=dict(duration=300, redraw=True),
+                            ),
+                        ],
+                        label=f.name,
+                    )
+                    for f in frames
+                ],
+                transition=dict(duration=0),
+                x=0.1,
+                y=0,
+                currentvalue=dict(
+                    font=dict(size=12, color="#38bdf8"),
+                    prefix="Date: ",
+                    visible=True,
+                ),
+            )
+        ],
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# -------------------------------------------------------------------
+# FEATURE 2: SECTOR VS SECTOR PAIR MATRIX
+# -------------------------------------------------------------------
+def render_pair_comparison(sec1_name, sec2_name, interval):
+    t1 = SECTOR_MAP[sec1_name]["index"]
+    t2 = SECTOR_MAP[sec2_name]["index"]
+
+    data = yf.download(
+        [t1, t2, BENCHMARK_SYMBOL],
+        period="1y",
+        interval=interval,
+        progress=False,
+    )
+    if isinstance(data.columns, pd.MultiIndex):
+        df_close = data["Close"]
+    else:
+        df_close = data[["Close"]]
+
+    if t1 not in df_close.columns or t2 not in df_close.columns:
+        st.error("Pair comparison data unavailable.")
+        return
+
+    # Relative Pair Ratio = Sector 1 / Sector 2
+    pair_ratio = (df_close[t1] / df_close[t2]) * 100
+    metrics = calculate_rrg_metrics(
+        pd.DataFrame({t1: df_close[t1]}), t1, BENCHMARK_SYMBOL
+    )
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric(f"Current Price ({sec1_name})", f"₹{df_close[t1].iloc[-1]:.2f}")
+    c2.metric(f"Current Price ({sec2_name})", f"₹{df_close[t2].iloc[-1]:.2f}")
+
+    curr_pair_ratio = pair_ratio.iloc[-1]
+    prev_pair_ratio = pair_ratio.iloc[-5] if len(pair_ratio) > 5 else curr_pair_ratio
+    pair_chg = ((curr_pair_ratio - prev_pair_ratio) / prev_pair_ratio) * 100
+    c3.metric(
+        f"Pair Strength ({sec1_name} / {sec2_name})",
+        f"{curr_pair_ratio:.2f}",
+        delta=f"{pair_chg:.2f}% (5 Periods)",
+    )
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=pair_ratio.index,
+            y=pair_ratio.values,
+            mode="lines",
+            line=dict(color="#38bdf8", width=2),
+            name=f"{sec1_name} / {sec2_name} Ratio",
+        )
+    )
+
+    # 20-period Moving Average on Pair Ratio
+    ma_pair = pair_ratio.rolling(20).mean()
+    fig.add_trace(
+        go.Scatter(
+            x=ma_pair.index,
+            y=ma_pair.values,
+            mode="lines",
+            line=dict(color="#f59e0b", width=1.5, dash="dash"),
+            name="20-Period MA Ratio",
+        )
+    )
+
+    fig.update_layout(
+        title=f"⚖️ Pair Strength Ratio Chart: {sec1_name} vs {sec2_name}",
+        paper_bgcolor="#111827",
+        plot_bgcolor="#111827",
+        height=400,
+        xaxis=dict(gridcolor="#1F2937", color="#9CA3AF"),
+        yaxis=dict(
+            title="Relative Ratio", gridcolor="#1F2937", color="#9CA3AF"
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# -------------------------------------------------------------------
+# FEATURE 3 & 4: AUTOMATED TRADE SETUPS & BACKTESTING
+# -------------------------------------------------------------------
+def generate_trade_setups(sector_rrg_data):
+    long_setups = []
+    short_setups = []
+
+    for sec_name, data in sector_rrg_data.items():
+        metrics = data["metrics"]
+        cmp = data["cmp"]
+        high_52w = data["high_52w"]
+        dist_52w = data["dist_52w"]
+
+        if metrics.empty:
+            continue
+
+        curr_ratio = metrics["ratio"].iloc[-1]
+        curr_mom = metrics["momentum"].iloc[-1]
+        quad_name, _, _, _ = get_quadrant(curr_ratio, curr_mom)
+
+        # LONG SETUP CONDITION:
+        # In Leading or Early Improving + Distance from 52W High <= 6% + Momentum > 99.5
+        if (
+            quad_name in ["Leading", "Improving"]
+            and dist_52w <= 6.0
+            and curr_mom >= 99.5
+        ):
+            stop_loss = round(cmp * 0.96, 2)  # 4% trailing SL
+            target_1 = round(cmp * 1.08, 2)  # 8% T1
+            target_2 = round(cmp * 1.15, 2)  # 15% T2
+            long_setups.append({
+                "Sector": sec_name,
+                "Quadrant": quad_name,
+                "CMP": cmp,
+                "52W High": high_52w,
+                "Dist High": f"{dist_52w}%",
+                "Stop Loss": f"₹{stop_loss}",
+                "Target 1": f"₹{target_1}",
+                "Target 2": f"₹{target_2}",
+                "Risk Reward": "1 : 2.0",
+            })
+
+        # SHORT / EXIT SETUP CONDITION:
+        # In Lagging Quadrant + Distance from High > 15% + Momentum < 99.5
+        if quad_name == "Lagging" and dist_52w >= 12.0 and curr_mom < 99.5:
+            stop_loss = round(cmp * 1.04, 2)
+            target_1 = round(cmp * 0.92, 2)
+            short_setups.append({
+                "Sector": sec_name,
+                "Quadrant": quad_name,
+                "CMP": cmp,
+                "52W High": high_52w,
+                "Dist High": f"{dist_52w}%",
+                "Stop Loss": f"₹{stop_loss}",
+                "Target Downside": f"₹{target_1}",
+                "Alert": "⚠️ Avoid Long / Consider Hedging",
+            })
+
+    return long_setups, short_setups
+
+
+def run_quadrant_backtest(sector_rrg_data):
+    results = []
+
+    for sec_name, data in sector_rrg_data.items():
+        metrics = data["metrics"]
+        prices = data["prices"]
+
+        if metrics.empty or len(prices) < 50:
+            continue
+
+        quadrants = []
+        for r, m in zip(metrics["ratio"], metrics["momentum"]):
+            q, _, _, _ = get_quadrant(r, m)
+            quadrants.append(q)
+
+        metrics["quadrant"] = quadrants
+        metrics["price"] = prices.reindex(metrics.index)
+
+        # Detect transition into LEADING quadrant
+        metrics["prev_quadrant"] = metrics["quadrant"].shift(1)
+        transitions = metrics[
+            (metrics["prev_quadrant"] == "Improving")
+            & (metrics["quadrant"] == "Leading")
+        ]
+
+        total_trades = 0
+        returns_5d = []
+        returns_10d = []
+
+        for idx_date in transitions.index:
+            try:
+                p_entry = metrics.loc[idx_date, "price"]
+                future_prices = metrics.loc[idx_date:, "price"]
+
+                if len(future_prices) > 5:
+                    p_5d = future_prices.iloc[5]
+                    ret_5d = ((p_5d - p_entry) / p_entry) * 100
+                    returns_5d.append(ret_5d)
+
+                if len(future_prices) > 10:
+                    p_10d = future_prices.iloc[10]
+                    ret_10d = ((p_10d - p_entry) / p_entry) * 100
+                    returns_10d.append(ret_10d)
+
+                total_trades += 1
+            except Exception:
+                continue
+
+        if total_trades > 0:
+            avg_5d = np.mean(returns_5d) if returns_5d else 0
+            avg_10d = np.mean(returns_10d) if returns_10d else 0
+            win_rate = (
+                (len([r for r in returns_10d if r > 0]) / len(returns_10d))
+                * 100
+                if returns_10d
+                else 0
+            )
+
+            results.append({
+                "Sector": sec_name,
+                "Signals Count": total_trades,
+                "Avg 5-Period Return (%)": round(avg_5d, 2),
+                "Avg 10-Period Return (%)": round(avg_10d, 2),
+                "Win Rate (10P) (%)": f"{round(win_rate, 1)}%",
+            })
+
+    return pd.DataFrame(results)
+
+
+# -------------------------------------------------------------------
+# MAIN DASHBOARD NAVIGATION (4 INTEGRATED TABS)
 # -------------------------------------------------------------------
 
-main_tab1, main_tab2 = st.tabs([
-    "🌐 14 Primary NSE Sectors RRG",
-    "🎯 Sector Heavyweight Stocks Drill-Down",
+main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs([
+    "🌐 14 Primary NSE Sectors",
+    "🎯 Heavyweight Stock Drill-Down",
+    "🎬 Animated RRG & Pair Matrix",
+    "🤖 AI Trade Setups & Backtesting",
 ])
 
-# Fetch All 14 Sectors Data
+# Fetch Sector Data
 sector_ticker_dict = {sec: SECTOR_MAP[sec]["index"] for sec in SECTOR_MAP}
 
 with st.spinner("Fetching Live Sector Market Data..."):
@@ -836,11 +1245,100 @@ with main_tab2:
             "Stock Name",
         )
 
-# Footer
+
+# TAB 3: ANIMATED RRG & SECTOR PAIR MATRIX
+with main_tab3:
+    st.markdown("### 🎬 Historical RRG Rotation Player")
+    st.caption(
+        "Niche **Play** button par click karke dekhein ki pichle 12 periods mein sectors ne quadrants kaise rotate kiye."
+    )
+    render_animated_rrg(sector_rrg_data, lookback_periods=12)
+
+    st.markdown("---")
+    st.markdown("### ⚔️ Sector vs Sector Pair Strength Ratio")
+    st.caption(
+        "Select any 2 sectors to compare their relative strength ratio directly (Pair Trading Analysis)."
+    )
+
+    col1, col2 = st.columns(2)
+    s1 = col1.selectbox("Base Sector (Numerator)", options=list(SECTOR_MAP.keys()), index=0)
+    s2 = col2.selectbox("Benchmark Sector (Denominator)", options=list(SECTOR_MAP.keys()), index=1)
+
+    if s1 == s2:
+        st.warning("Please select two different sectors to compare.")
+    else:
+        render_pair_comparison(s1, s2, timeframe)
+
+
+# TAB 4: AI TRADE SETUPS & BACKTESTING
+with main_tab4:
+    st.markdown("### 🤖 Automated AI Trade Setups")
+    st.caption(
+        "High-conviction setups generated automatically based on RRG Quadrants & 52-Week High Proximity."
+    )
+
+    long_ideas, short_ideas = generate_trade_setups(sector_rrg_data)
+
+    c_long, c_short = st.columns(2)
+
+    with c_long:
+        st.markdown(
+            "#### 🚀 Bullish High-Conviction Setups (Leading / Early Improving)"
+        )
+        if not long_ideas:
+            st.info("No high-conviction bullish setups at this moment.")
+        else:
+            for item in long_ideas:
+                st.markdown(
+                    f"""
+                <div class="setup-card-long">
+                    <h4 style="color:#10b981; margin:0;">{item['Sector']} <span style="font-size:0.8rem; color:#9ca3af;">({item['Quadrant']})</span></h4>
+                    <p style="margin:5px 0; color:#f3f4f6;"><b>CMP:</b> ₹{item['CMP']} | <b>52W High:</b> ₹{item['52W High']} (Dist: {item['Dist High']})</p>
+                    <p style="margin:5px 0; color:#38bdf8;">🎯 <b>Target 1:</b> {item['Target 1']} | 🎯 <b>Target 2:</b> {item['Target 2']}</p>
+                    <p style="margin:5px 0; color:#ef4444;">🛑 <b>Stop Loss:</b> {item['Stop Loss']} (RR {item['Risk Reward']})</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+
+    with c_short:
+        st.markdown(
+            "#### 🔻 Bearish / Exit Warning Setups (Lagging Quadrant)"
+        )
+        if not short_ideas:
+            st.info("No high-risk short/exit setups detected.")
+        else:
+            for item in short_ideas:
+                st.markdown(
+                    f"""
+                <div class="setup-card-short">
+                    <h4 style="color:#ef4444; margin:0;">{item['Sector']} <span style="font-size:0.8rem; color:#9ca3af;">({item['Quadrant']})</span></h4>
+                    <p style="margin:5px 0; color:#f3f4f6;"><b>CMP:</b> ₹{item['CMP']} | <b>52W High:</b> ₹{item['52W High']} (Dist: {item['Dist High']})</p>
+                    <p style="margin:5px 0; color:#f59e0b;"><b>Downside Target:</b> {item['Target Downside']}</p>
+                    <p style="margin:5px 0; color:#ef4444;">⚠️ <b>{item['Alert']}</b></p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("---")
+    st.markdown("### 📈 Historical Quadrant Shift Backtest Engine")
+    st.caption(
+        "Proof of Performance: Jab koi sector **Improving se Leading Quadrant** mein enter hota hai, uske baad ke historical returns:"
+    )
+
+    backtest_df = run_quadrant_backtest(sector_rrg_data)
+    if backtest_df.empty:
+        st.info("Calculating backtest metrics...")
+    else:
+        st.dataframe(backtest_df, use_container_width=True, hide_index=True)
+
+
+# Footer Branding
 st.markdown(
     """
     <div class="footer-text">
-        © 2026 <b>Grow More Trading Institute</b> | Live Market Sector & Stock Rotation RRG Analytics Dashboard
+        © 2026 <b>Grow More Trading Institute</b> | Institutional RRG & AI Trade Intelligence Dashboard
     </div>
 """,
     unsafe_allow_html=True,
