@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -12,31 +13,71 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling (Dark Theme & Institute Branding)
+# Custom Styling (Dark Theme, Blinking Live Dot & Institute Branding)
 st.markdown(
     """
     <style>
     .stApp { background-color: #0b0f19; color: #f3f4f6; }
     
-    /* Branding Banner */
+    /* Branding Banner Flex Container */
     .brand-header {
         background: linear-gradient(90deg, #1e3a8a 0%, #0f172a 100%);
-        padding: 16px 24px;
+        padding: 18px 24px;
         border-radius: 12px;
         border-left: 6px solid #3b82f6;
         margin-bottom: 25px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
     }
     .brand-title { font-size: 1.8rem; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.5px; }
     .brand-subtitle { font-size: 0.95rem; color: #9ca3af; margin-top: 4px; }
-    .brand-tag {
-        background-color: #2563eb;
-        color: white;
-        padding: 3px 10px;
+    
+    /* Live Indicator & Clock Styling */
+    .live-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid #1e293b;
+    }
+    .live-badge {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid #ef4444;
+        padding: 4px 10px;
         border-radius: 12px;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        letter-spacing: 1px;
+    }
+    .live-dot {
+        height: 9px;
+        width: 9px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+        box-shadow: 0 0 8px #ef4444;
+        animation: pulse 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.85); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    .clock-text {
+        font-size: 0.9rem;
+        color: #38bdf8;
         font-weight: 600;
-        vertical-align: middle;
+        font-family: monospace;
     }
 
     /* Status Badges */
@@ -66,16 +107,43 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header Branding Banner
+# Header Branding Banner with Blinking LIVE Badge & Realtime Clock
 st.markdown(
     """
     <div class="brand-header">
-        <div class="brand-title">
-            GROW MORE TRADING INSTITUTE 
-            <span class="brand-tag">LIVE RRG ANALYTICS</span>
+        <div>
+            <div class="brand-title">GROW MORE TRADING INSTITUTE</div>
+            <div class="brand-subtitle">Real-time NSE Sector Rotation & Relative Strength Matrix</div>
         </div>
-        <div class="brand-subtitle">Real-time NSE Sector Rotation & Relative Strength Matrix</div>
+        <div class="live-container">
+            <div class="live-badge">
+                <span class="live-dot"></span>LIVE
+            </div>
+            <div id="live-clock" class="clock-text">⏰ Loading Clock...</div>
+        </div>
     </div>
+
+    <script>
+    function updateClock() {
+        const now = new Date();
+        const options = { 
+            timeZone: 'Asia/Kolkata', 
+            hour12: true, 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit',
+            day: '2-digit',
+            month: 'short'
+        };
+        const timeString = now.toLocaleString('en-IN', options);
+        const clockElem = document.getElementById('live-clock');
+        if(clockElem) {
+            clockElem.innerText = '⏰ ' + timeString + ' IST';
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    </script>
 """,
     unsafe_allow_html=True,
 )
