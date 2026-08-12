@@ -39,14 +39,7 @@ st.markdown(
         vertical-align: middle;
     }
 
-    /* Sector Summary Cards & Table */
-    .table-container {
-        background-color: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 12px;
-        padding: 20px;
-        margin-top: 25px;
-    }
+    /* Status Badges */
     .status-badge {
         padding: 4px 10px;
         border-radius: 6px;
@@ -198,7 +191,7 @@ def get_quadrant(ratio, momentum):
     )
 
 
-# Chart Logic
+# Chart Construction Logic
 fig = go.Figure()
 min_x, max_x, min_y, max_y = 98, 102, 98, 102
 sector_summary = []
@@ -218,7 +211,6 @@ for sector, df in rrg_data.items():
     quad_name, desc, badge_cls, quad_color = get_quadrant(head_x, head_y)
     color = SECTOR_COLORS.get(sector, "#3B82F6")
 
-    # Momentum Direction Arrow
     mom_change = head_y - y_vals[-2] if len(y_vals) > 1 else 0
     trend_icon = "⬆️ Up" if mom_change > 0 else "⬇️ Down"
 
@@ -261,13 +253,12 @@ for sector, df in rrg_data.items():
         )
     )
 
-# Axis Bounds Calculations
+# Dynamic Bounds & Axis Padding
 padding_x = max(abs(100 - min_x), abs(max_x - 100)) + 1.5
 padding_y = max(abs(100 - min_y), abs(max_y - 100)) + 1.5
 x_range = [100 - padding_x, 100 + padding_x]
 y_range = [100 - padding_y, 100 + padding_y]
 
-# Quadrant Styling
 fig.update_layout(
     paper_bgcolor="#111827",
     plot_bgcolor="#111827",
@@ -377,18 +368,17 @@ fig.update_layout(
     ],
 )
 
-# Render Chart
+# Render RRG Plotly Chart
 st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------------------------------------------------
-# ENHANCED SECTOR ROTATION SUMMARY TABLE (GROW MORE TRADING INSTITUTE)
+# SUMMARY METRIC CARDS & CLEAN TABLE RENDERING
 # -------------------------------------------------------------------
 
 st.subheader("📊 Grow More Institute — Live Sector Matrix")
 
 df_summary = pd.DataFrame(sector_summary)
 
-# Quick Metric Counters Banner
 m1, m2, m3, m4 = st.columns(4)
 leading_cnt = len(df_summary[df_summary["Quadrant"] == "Leading"])
 improving_cnt = len(df_summary[df_summary["Quadrant"] == "Improving"])
@@ -400,7 +390,6 @@ m2.metric(label="⚡ Improving Sectors", value=improving_cnt)
 m3.metric(label="⚠️ Weakening Sectors", value=weakening_cnt)
 m4.metric(label="🔻 Lagging Sectors", value=lagging_cnt)
 
-# Detailed Sector Table Tabs
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [
         "📋 All Sectors",
@@ -417,33 +406,38 @@ def render_styled_table(data_frame):
         st.info("No sectors currently in this quadrant.")
         return
 
-    table_html = """
-    <table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden;">
-        <thead>
-            <tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
-                <th style="padding:12px 16px;">Sector Name</th>
-                <th style="padding:12px 16px;">Quadrant</th>
-                <th style="padding:12px 16px;">RS-Ratio</th>
-                <th style="padding:12px 16px;">RS-Momentum</th>
-                <th style="padding:12px 16px;">Momentum Trend</th>
-                <th style="padding:12px 16px;">Technical Status</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
+    rows = ""
     for _, row in data_frame.iterrows():
-        table_html += f"""
-            <tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
-                <td style="padding:12px 16px; font-weight:600;">{row['Sector']}</td>
-                <td style="padding:12px 16px;"><span class="status-badge {row['BadgeClass']}">{row['Quadrant']}</span></td>
-                <td style="padding:12px 16px; font-weight:500;">{row['RS-Ratio']}</td>
-                <td style="padding:12px 16px; font-weight:500;">{row['RS-Momentum']}</td>
-                <td style="padding:12px 16px;">{row['Trend']}</td>
-                <td style="padding:12px 16px; color:#9ca3af; font-size:0.85rem;">{row['Status']}</td>
-            </tr>
-        """
-    table_html += "</tbody></table>"
-    st.markdown(table_html, unsafe_allow_html=True)
+        rows += f"""
+<tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
+<td style="padding:12px 16px; font-weight:600;">{row['Sector']}</td>
+<td style="padding:12px 16px;"><span class="status-badge {row['BadgeClass']}">{row['Quadrant']}</span></td>
+<td style="padding:12px 16px; font-weight:500;">{row['RS-Ratio']}</td>
+<td style="padding:12px 16px; font-weight:500;">{row['RS-Momentum']}</td>
+<td style="padding:12px 16px;">{row['Trend']}</td>
+<td style="padding:12px 16px; color:#9ca3af; font-size:0.85rem;">{row['Status']}</td>
+</tr>
+"""
+
+    table_html = f"""
+<table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
+<thead>
+<tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
+<th style="padding:12px 16px;">Sector Name</th>
+<th style="padding:12px 16px;">Quadrant</th>
+<th style="padding:12px 16px;">RS-Ratio</th>
+<th style="padding:12px 16px;">RS-Momentum</th>
+<th style="padding:12px 16px;">Momentum Trend</th>
+<th style="padding:12px 16px;">Technical Status</th>
+</tr>
+</thead>
+<tbody>
+{rows}
+</tbody>
+</table>
+"""
+    clean_html = "\n".join([line.strip() for line in table_html.split("\n")])
+    st.markdown(clean_html, unsafe_allow_html=True)
 
 
 with tab1:
