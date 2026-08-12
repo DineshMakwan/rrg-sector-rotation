@@ -148,9 +148,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 14 Primary NSE Sectors & Benchmark Mapping
+# 14 Primary NSE Sectors & Benchmark Mapping (Verified Yahoo Finance Tickers)
 SECTOR_MAP = {
-    "Nifty Bank": {"index": "^CNXBANK", "stocks": {"HDFC Bank": "HDFCBANK.NS", "ICICI Bank": "ICICIBANK.NS", "SBI": "SBIN.NS", "Kotak Bank": "KOTAKBANK.NS", "Axis Bank": "AXISBANK.NS", "IndusInd Bank": "INDUSINDBK.NS"}},
+    "Nifty Bank": {"index": "^NSEBANK", "stocks": {"HDFC Bank": "HDFCBANK.NS", "ICICI Bank": "ICICIBANK.NS", "SBI": "SBIN.NS", "Kotak Bank": "KOTAKBANK.NS", "Axis Bank": "AXISBANK.NS", "IndusInd Bank": "INDUSINDBK.NS"}},
     "Nifty IT": {"index": "^CNXIT", "stocks": {"TCS": "TCS.NS", "Infosys": "INFY.NS", "HCL Tech": "HCLTECH.NS", "Wipro": "WIPRO.NS", "Tech Mahindra": "TECHM.NS", "LTIMindtree": "LTIM.NS"}},
     "Nifty Auto": {"index": "^CNXAUTO", "stocks": {"Tata Motors": "TATAMOTORS.NS", "M&M": "M&M.NS", "Maruti": "MARUTI.NS", "Bajaj Auto": "BAJAJ-AUTO.NS", "Hero MotoCorp": "HEROMOTOCO.NS", "Eicher Motors": "EICHERMOT.NS"}},
     "Nifty Metal": {"index": "^CNXMETAL", "stocks": {"Tata Steel": "TATASTEEL.NS", "JSW Steel": "JSWSTEEL.NS", "Hindalco": "HINDALCO.NS", "Vedanta": "VEDL.NS", "Coal India": "COALINDIA.NS", "NMDC": "NMDC.NS"}},
@@ -311,10 +311,14 @@ def render_rrg_chart(rrg_data_dict, title_text):
             dict(x=(100+x_range[0])/2, y=(100+y_range[1])/2, text="<b>IMPROVING</b>", showarrow=False, font=dict(color="rgba(59, 130, 246, 0.3)", size=24)),
         ]
     )
-    return fig, pd.DataFrame(summary_list)
+    
+    # Safe DataFrame creation with default columns to prevent KeyError
+    columns_list = ["Name", "RS-Ratio", "RS-Momentum", "Quadrant", "Status", "BadgeClass", "Trend"]
+    summary_df = pd.DataFrame(summary_list, columns=columns_list)
+    return fig, summary_df
 
 def render_styled_table(data_frame, col_name="Sector / Stock Name"):
-    if data_frame.empty:
+    if data_frame is None or data_frame.empty or "Quadrant" not in data_frame.columns:
         st.info("No items currently in this quadrant.")
         return
 
