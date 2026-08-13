@@ -162,158 +162,487 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 14 Primary NSE Sectors Mapping
+# FULL EXPANDED 23 SECTORS MAPPING WITH ALL CONSTITUENT STOCKS
 SECTOR_MAP = {
-    "Nifty Bank": {
-        "index": "^NSEBANK",
+    "Nifty REITs & Realty": {
+        "index": "NIFTY_REITS_INVITS.NS",
         "stocks": {
-            "HDFC Bank": "HDFCBANK.NS",
-            "ICICI Bank": "ICICIBANK.NS",
-            "SBI": "SBIN.NS",
-            "Kotak Bank": "KOTAKBANK.NS",
-            "Axis Bank": "AXISBANK.NS",
-            "IndusInd Bank": "INDUSINDBK.NS",
+            "ABREL": "ABREL.NS",
+            "EMBASSY": "EMBASSY.NS",
+            "LODHA": "LODHA.NS",
+            "NXST": "NXST.NS",
+            "SOBHA": "SOBHA.NS",
+            "PRESTIGE": "PRESTIGE.NS",
+            "OBEROIRLTY": "OBEROIRLTY.NS",
+            "MINDSPACE": "MINDSPACE.NS",
+            "BIRET": "BIRET.NS",
+            "KRT": "KRT.NS",
+            "GODREJPROP": "GODREJPROP.NS",
+            "DLF": "DLF.NS",
+            "PHOENIXLTD": "PHOENIXLTD.NS",
+            "ANANTRAJ": "ANANTRAJ.NS",
+            "BRIGADE": "BRIGADE.NS",
         },
     },
-    "Nifty IT": {
-        "index": "^CNXIT",
+    "Nifty Cement": {
+        "index": "NIFTY_CEMENT.NS",
         "stocks": {
-            "TCS": "TCS.NS",
-            "Infosys": "INFY.NS",
-            "HCL Tech": "HCLTECH.NS",
-            "Wipro": "WIPRO.NS",
-            "Tech Mahindra": "TECHM.NS",
-            "LTIMindtree": "LTIM.NS",
+            "STARCEMENT": "STARCEMENT.NS",
+            "RAMCOCEM": "RAMCOCEM.NS",
+            "JKLAKSHMI": "JKLAKSHMI.NS",
+            "NUVOCO": "NUVOCO.NS",
+            "JSWCEMENT": "JSWCEMENT.NS",
+            "AMBUJACEM": "AMBUJACEM.NS",
+            "INDIACEM": "INDIACEM.NS",
+            "ORIENTCEM": "ORIENTCEM.NS",
+            "BIRLACORPN": "BIRLACORPN.NS",
+            "PRSMJOHNSN": "PRSMJOHNSN.NS",
+            "ACC": "ACC.NS",
+            "JKCEMENT": "JKCEMENT.NS",
+            "DALBHARAT": "DALBHARAT.NS",
+            "SHREECEM": "SHREECEM.NS",
+            "GRASIM": "GRASIM.NS",
+            "ULTRACEMCO": "ULTRACEMCO.NS",
+        },
+    },
+    "Nifty Chemicals": {
+        "index": "NIFTY_CHEMICALS.NS",
+        "stocks": {
+            "FLUOROCHEM": "FLUOROCHEM.NS",
+            "SOLARINDS": "SOLARINDS.NS",
+            "HSCL": "HSCL.NS",
+            "AARTIIND": "AARTIIND.NS",
+            "ATUL": "ATUL.NS",
+            "NAVINFLUOR": "NAVINFLUOR.NS",
+            "PIIND": "PIIND.NS",
+            "CHAMBLFERT": "CHAMBLFERT.NS",
+            "SWANCORP": "SWANCORP.NS",
+            "PCBL": "PCBL.NS",
+            "TATACHEM": "TATACHEM.NS",
+            "SUMICHEM": "SUMICHEM.NS",
+            "COROMANDEL": "COROMANDEL.NS",
+            "LINDEINDIA": "LINDEINDIA.NS",
+            "DEEPAKNTR": "DEEPAKNTR.NS",
+            "DEEPAKFERT": "DEEPAKFERT.NS",
+            "PIDILITIND": "PIDILITIND.NS",
+            "BAYERCROP": "BAYERCROP.NS",
+            "SRF": "SRF.NS",
+            "UPL": "UPL.NS",
+        },
+    },
+    "Nifty MidSmall Healthcare": {
+        "index": "NIFTY_MIDSML_HLTH.NS",
+        "stocks": {
+            "NATCOPHARM": "NATCOPHARM.NS",
+            "IPCALAB": "IPCALAB.NS",
+            "ONESOURCE": "ONESOURCE.NS",
+            "AJANTPHARM": "AJANTPHARM.NS",
+            "WOCKPHARMA": "WOCKPHARMA.NS",
+            "COHANCE": "COHANCE.NS",
+            "PPLPHARMA": "PPLPHARMA.NS",
+            "ACUTAAS": "ACUTAAS.NS",
+            "GLAND": "GLAND.NS",
+            "MEDANTA": "MEDANTA.NS",
+            "NEULANDLAB": "NEULANDLAB.NS",
+            "GLENMARK": "GLENMARK.NS",
+            "SAILIFE": "SAILIFE.NS",
+            "LALPATHLAB": "LALPATHLAB.NS",
+            "ABBOTINDIA": "ABBOTINDIA.NS",
+            "NH": "NH.NS",
+            "AUROPHARMA": "AUROPHARMA.NS",
+            "GLAXO": "GLAXO.NS",
+            "ASTERDM": "ASTERDM.NS",
+            "FORTIS": "FORTIS.NS",
+            "KIMS": "KIMS.NS",
+            "PFIZER": "PFIZER.NS",
+            "MANKIND": "MANKIND.NS",
+            "GRANULES": "GRANULES.NS",
+            "ALKEM": "ALKEM.NS",
+            "POLYMED": "POLYMED.NS",
+            "LUPIN": "LUPIN.NS",
+            "LAURUSLABS": "LAURUSLABS.NS",
+            "SYNGENE": "SYNGENE.NS",
+            "BIOCON": "BIOCON.NS",
+        },
+    },
+    "Nifty Oil & Gas": {
+        "index": "NIFTY_OIL_AND_GAS.NS",
+        "stocks": {
+            "MGL": "MGL.NS",
+            "AEGISVOPAK": "AEGISVOPAK.NS",
+            "AEGISLOG": "AEGISLOG.NS",
+            "HINDPETRO": "HINDPETRO.NS",
+            "IGL": "IGL.NS",
+            "OIL": "OIL.NS",
+            "CASTROLIND": "CASTROLIND.NS",
+            "ONGC": "ONGC.NS",
+            "IOC": "IOC.NS",
+            "ATGL": "ATGL.NS",
+            "RELIANCE": "RELIANCE.NS",
+            "GAIL": "GAIL.NS",
+            "BPCL": "BPCL.NS",
+            "PETRONET": "PETRONET.NS",
+            "CHENNPETRO": "CHENNPETRO.NS",
+        },
+    },
+    "Nifty Consumer Durables": {
+        "index": "NIFTY_CONSR_DURBL.NS",
+        "stocks": {
+            "BATAINDIA": "BATAINDIA.NS",
+            "KAJARIACER": "KAJARIACER.NS",
+            "BLUESTARCO": "BLUESTARCO.NS",
+            "AMBER": "AMBER.NS",
+            "WHIRLPOOL": "WHIRLPOOL.NS",
+            "KALYANKJIL": "KALYANKJIL.NS",
+            "HAVELLS": "HAVELLS.NS",
+            "LGEINDIA": "LGEINDIA.NS",
+            "VOLTAS": "VOLTAS.NS",
+            "CROMPTON": "CROMPTON.NS",
+            "DIXON": "DIXON.NS",
+            "TITAN": "TITAN.NS",
+            "PGEL": "PGEL.NS",
+        },
+    },
+    "Nifty Healthcare": {
+        "index": "NIFTY_HEALTHCARE.NS",
+        "stocks": {
+            "IPCALAB": "IPCALAB.NS",
+            "PPLPHARMA": "PPLPHARMA.NS",
+            "APOLLOHOSP": "APOLLOHOSP.NS",
+            "GLENMARK": "GLENMARK.NS",
+            "MAXHEALTH": "MAXHEALTH.NS",
+            "ABBOTINDIA": "ABBOTINDIA.NS",
+            "AUROPHARMA": "AUROPHARMA.NS",
+            "SUNPHARMA": "SUNPHARMA.NS",
+            "DRREDDY": "DRREDDY.NS",
+            "CIPLA": "CIPLA.NS",
+            "FORTIS": "FORTIS.NS",
+            "TORNTPHARM": "TORNTPHARM.NS",
+            "MANKIND": "MANKIND.NS",
+            "ALKEM": "ALKEM.NS",
+            "LUPIN": "LUPIN.NS",
+            "LAURUSLABS": "LAURUSLABS.NS",
+            "SYNGENE": "SYNGENE.NS",
+            "BIOCON": "BIOCON.NS",
+            "DIVISLAB": "DIVISLAB.NS",
+            "ZYDUSLIFE": "ZYDUSLIFE.NS",
+        },
+    },
+    "Nifty Private Bank": {
+        "index": "NIFTY_PVT_BANK.NS",
+        "stocks": {
+            "IDFCFIRSTB": "IDFCFIRSTB.NS",
+            "KOTAKBANK": "KOTAKBANK.NS",
+            "BANDHANBNK": "BANDHANBNK.NS",
+            "HDFCBANK": "HDFCBANK.NS",
+            "YESBANK": "YESBANK.NS",
+            "INDUSINDBK": "INDUSINDBK.NS",
+            "RBLBANK": "RBLBANK.NS",
+            "FEDERALBNK": "FEDERALBNK.NS",
+            "AXISBANK": "AXISBANK.NS",
+            "ICICIBANK": "ICICIBANK.NS",
+        },
+    },
+    "Nifty Realty": {
+        "index": "^CNXREALTY",
+        "stocks": {
+            "ABREL": "ABREL.NS",
+            "LODHA": "LODHA.NS",
+            "SOBHA": "SOBHA.NS",
+            "PRESTIGE": "PRESTIGE.NS",
+            "OBEROIRLTY": "OBEROIRLTY.NS",
+            "GODREJPROP": "GODREJPROP.NS",
+            "DLF": "DLF.NS",
+            "PHOENIXLTD": "PHOENIXLTD.NS",
+            "ANANTRAJ": "ANANTRAJ.NS",
+            "BRIGADE": "BRIGADE.NS",
+        },
+    },
+    "Nifty PSU Bank": {
+        "index": "^CNXPSUBANK",
+        "stocks": {
+            "MAHABANK": "MAHABANK.NS",
+            "CENTRALBK": "CENTRALBK.NS",
+            "PSB": "PSB.NS",
+            "IOB": "IOB.NS",
+            "UCOBANK": "UCOBANK.NS",
+            "UNIONBANK": "UNIONBANK.NS",
+            "SBIN": "SBIN.NS",
+            "CANBK": "CANBK.NS",
+            "INDIANB": "INDIANB.NS",
+            "BANKINDIA": "BANKINDIA.NS",
+            "PNB": "PNB.NS",
+            "BANKBARODA": "BANKBARODA.NS",
         },
     },
     "Nifty Auto": {
         "index": "^CNXAUTO",
         "stocks": {
-            "Tata Motors": "TATAMOTORS.NS",
+            "MARUTI": "MARUTI.NS",
             "M&M": "M&M.NS",
-            "Maruti": "MARUTI.NS",
-            "Bajaj Auto": "BAJAJ-AUTO.NS",
-            "Hero MotoCorp": "HEROMOTOCO.NS",
-            "Eicher Motors": "EICHERMOT.NS",
+            "TATAMOTORS": "TATAMOTORS.NS",
+            "BAJAJ-AUTO": "BAJAJ-AUTO.NS",
+            "EICHERMOT": "EICHERMOT.NS",
+            "HEROMOTOCO": "HEROMOTOCO.NS",
+            "TVSMOTOR": "TVSMOTOR.NS",
+            "BHARATFORG": "BHARATFORG.NS",
+            "ASHOKLEY": "ASHOKLEY.NS",
+            "BALKRISIND": "BALKRISIND.NS",
+            "MRF": "MRF.NS",
+            "MOTHERSON": "MOTHERSON.NS",
+            "TIINDIA": "TIINDIA.NS",
+            "BOSCHLTD": "BOSCHLTD.NS",
+            "SONACOMS": "SONACOMS.NS",
         },
     },
-    "Nifty Metal": {
-        "index": "^CNXMETAL",
+    "Nifty Bank": {
+        "index": "^NSEBANK",
         "stocks": {
-            "Tata Steel": "TATASTEEL.NS",
-            "JSW Steel": "JSWSTEEL.NS",
-            "Hindalco": "HINDALCO.NS",
-            "Vedanta": "VEDL.NS",
-            "Coal India": "COALINDIA.NS",
-            "NMDC": "NMDC.NS",
+            "HDFCBANK": "HDFCBANK.NS",
+            "ICICIBANK": "ICICIBANK.NS",
+            "AXISBANK": "AXISBANK.NS",
+            "KOTAKBANK": "KOTAKBANK.NS",
+            "SBIN": "SBIN.NS",
+            "INDUSINDBK": "INDUSINDBK.NS",
+            "BANKBARODA": "BANKBARODA.NS",
+            "PNB": "PNB.NS",
+            "AUBANK": "AUBANK.NS",
+            "FEDERALBNK": "FEDERALBNK.NS",
+            "IDFCFIRSTB": "IDFCFIRSTB.NS",
+            "BANDHANBNK": "BANDHANBNK.NS",
         },
     },
-    "Nifty Pharma": {
-        "index": "^CNXPHARMA",
+    "Nifty Financial Services": {
+        "index": "^CNXFIN",
         "stocks": {
-            "Sun Pharma": "SUNPHARMA.NS",
-            "Cipla": "CIPLA.NS",
-            "Dr. Reddy's": "DRREDDY.NS",
-            "Divi's Lab": "DIVISLAB.NS",
-            "Lupin": "LUPIN.NS",
-            "Mankind": "MANKIND.NS",
+            "HDFCBANK": "HDFCBANK.NS",
+            "ICICIBANK": "ICICIBANK.NS",
+            "AXISBANK": "AXISBANK.NS",
+            "KOTAKBANK": "KOTAKBANK.NS",
+            "SBIN": "SBIN.NS",
+            "BAJFINANCE": "BAJFINANCE.NS",
+            "BAJAJFINSV": "BAJAJFINSV.NS",
+            "PFC": "PFC.NS",
+            "REC": "REC.NS",
+            "HDFCLIFE": "HDFCLIFE.NS",
+            "SBILIFE": "SBILIFE.NS",
+            "ICICIPRULI": "ICICIPRULI.NS",
+            "ICICIGI": "ICICIGI.NS",
+            "CHOLAFIN": "CHOLAFIN.NS",
+            "SHRIRAMFIN": "SHRIRAMFIN.NS",
+            "MUTHOOTFIN": "MUTHOOTFIN.NS",
+            "JIOFIN": "JIOFIN.NS",
+            "HDFCAMC": "HDFCAMC.NS",
         },
     },
     "Nifty FMCG": {
         "index": "^CNXFMCG",
         "stocks": {
             "ITC": "ITC.NS",
-            "HUL": "HINDUNILVR.NS",
-            "Britannia": "BRITANNIA.NS",
-            "Tata Consumer": "TATACONSUM.NS",
-            "Nestle": "NESTLEIND.NS",
+            "HINDUNILVR": "HINDUNILVR.NS",
+            "NESTLEIND": "NESTLEIND.NS",
+            "BRITANNIA": "BRITANNIA.NS",
+            "TATACONSUM": "TATACONSUM.NS",
+            "GODREJCP": "GODREJCP.NS",
+            "DABUR": "DABUR.NS",
+            "MARICO": "MARICO.NS",
+            "COLPAL": "COLPAL.NS",
             "VBL": "VBL.NS",
+            "MCDOWELL-N": "MCDOWELL-N.NS",
+            "UBL": "UBL.NS",
+            "BALRAMCHIN": "BALRAMCHIN.NS",
+            "PGHH": "PGHH.NS",
+            "EMAMILTD": "EMAMILTD.NS",
         },
     },
-    "Nifty Realty": {
-        "index": "^CNXREALTY",
+    "Nifty IT": {
+        "index": "^CNXIT",
         "stocks": {
-            "DLF": "DLF.NS",
-            "Lodha": "LODHA.NS",
-            "Godrej Prop": "GODREJPROP.NS",
-            "Oberoi Realty": "OBEROIRLTY.NS",
-            "Phoenix Mills": "PHOENIXLTD.NS",
-        },
-    },
-    "Nifty Energy": {
-        "index": "^CNXENERGY",
-        "stocks": {
-            "Reliance": "RELIANCE.NS",
-            "NTPC": "NTPC.NS",
-            "ONGC": "ONGC.NS",
-            "Power Grid": "POWERGRID.NS",
-            "BPCL": "BPCL.NS",
-            "IOC": "IOC.NS",
-        },
-    },
-    "Nifty Infra": {
-        "index": "^CNXINFRA",
-        "stocks": {
-            "L&T": "LT.NS",
-            "Reliance": "RELIANCE.NS",
-            "Bharti Airtel": "BHARTIARTL.NS",
-            "NTPC": "NTPC.NS",
-            "Power Grid": "POWERGRID.NS",
-            "UltraTech": "ULTRACEMCO.NS",
-        },
-    },
-    "Nifty Fin Service": {
-        "index": "NIFTY_FIN_SERVICE.NS",
-        "stocks": {
-            "HDFC Bank": "HDFCBANK.NS",
-            "ICICI Bank": "ICICIBANK.NS",
-            "SBI": "SBIN.NS",
-            "PFC": "PFC.NS",
-            "REC": "REC.NS",
-            "Chola Fin": "CHOLAFIN.NS",
-        },
-    },
-    "Nifty PSU Bank": {
-        "index": "^CNXPSUBANK",
-        "stocks": {
-            "SBI": "SBIN.NS",
-            "Bank of Baroda": "BANKBARODA.NS",
-            "PNB": "PNB.NS",
-            "Canara Bank": "CANBK.NS",
-            "Union Bank": "UNIONBANK.NS",
-            "Indian Bank": "INDIANB.NS",
+            "TCS": "TCS.NS",
+            "INFY": "INFY.NS",
+            "HCLTECH": "HCLTECH.NS",
+            "WIPRO": "WIPRO.NS",
+            "LTIM": "LTIM.NS",
+            "TECHM": "TECHM.NS",
+            "PERSISTENT": "PERSISTENT.NS",
+            "COFORGE": "COFORGE.NS",
+            "MPHASIS": "MPHASIS.NS",
+            "LTTS": "LTTS.NS",
         },
     },
     "Nifty Media": {
         "index": "^CNXMEDIA",
         "stocks": {
+            "SUNTV": "SUNTV.NS",
             "ZEEL": "ZEEL.NS",
-            "Sun TV": "SUNTV.NS",
-            "PVR INOX": "PVRINOX.NS",
-            "Nazara Tech": "NAZARA.NS",
-            "TV18": "TV18BRDCST.NS",
+            "PVRINOX": "PVRINOX.NS",
+            "TV18BRDCST": "TV18BRDCST.NS",
+            "NETWORK18": "NETWORK18.NS",
+            "NAZARA": "NAZARA.NS",
+            "DISHTV": "DISHTV.NS",
+            "HATHWAY": "HATHWAY.NS",
+            "NAVNETEDUL": "NAVNETEDUL.NS",
+            "TIPSMUSIC": "TIPSMUSIC.NS",
         },
     },
-    "Nifty Consumer Durables": {
-        "index": "NIFTY_CONSR_DURBL.NS",
+    "Nifty Metal": {
+        "index": "^CNXMETAL",
         "stocks": {
-            "Dixon": "DIXON.NS",
-            "Titan": "TITAN.NS",
-            "Havells": "HAVELLS.NS",
-            "Voltas": "VOLTAS.NS",
-            "Crompton": "CROMPTON.NS",
-            "Polycab": "POLYCAB.NS",
+            "TATASTEEL": "TATASTEEL.NS",
+            "JINDALSTEL": "JINDALSTEL.NS",
+            "JSWSTEEL": "JSWSTEEL.NS",
+            "HINDALCO": "HINDALCO.NS",
+            "VEDL": "VEDL.NS",
+            "NMDC": "NMDC.NS",
+            "SAIL": "SAIL.NS",
+            "NATIONALUM": "NATIONALUM.NS",
+            "COALINDIA": "COALINDIA.NS",
+            "APLAPOLLO": "APLAPOLLO.NS",
+            "HINDZINC": "HINDZINC.NS",
+            "HINDCOPPER": "HINDCOPPER.NS",
+            "WELCORP": "WELCORP.NS",
+            "RATNAMANI": "RATNAMANI.NS",
+            "MOIL": "MOIL.NS",
         },
     },
-    "Nifty Healthcare": {
-        "index": "NIFTY_HEALTHCARE.NS",
+    "Nifty Pharma": {
+        "index": "^CNXPHARMA",
         "stocks": {
-            "Sun Pharma": "SUNPHARMA.NS",
-            "Cipla": "CIPLA.NS",
-            "Apollo Hospitals": "APOLLOHOSP.NS",
-            "Max Healthcare": "MAXHEALTH.NS",
-            "Syngene": "SYNGENE.NS",
-            "Dr Lal Path": "LALPATHLAB.NS",
+            "SUNPHARMA": "SUNPHARMA.NS",
+            "CIPLA": "CIPLA.NS",
+            "DRREDDY": "DRREDDY.NS",
+            "DIVISLAB": "DIVISLAB.NS",
+            "LUPIN": "LUPIN.NS",
+            "TORNTPHARM": "TORNTPHARM.NS",
+            "AUROPHARMA": "AUROPHARMA.NS",
+            "ZYDUSLIFE": "ZYDUSLIFE.NS",
+            "ALKEM": "ALKEM.NS",
+            "GLENMARK": "GLENMARK.NS",
+            "BIOCON": "BIOCON.NS",
+            "IPCALAB": "IPCALAB.NS",
+            "LAURUSLABS": "LAURUSLABS.NS",
+            "GRANULES": "GRANULES.NS",
+            "MANKIND": "MANKIND.NS",
+            "SYNGENE": "SYNGENE.NS",
+            "JBCHEMPH": "JBCHEMPH.NS",
+            "NATCOPHARM": "NATCOPHARM.NS",
+            "AJANTPHARM": "AJANTPHARM.NS",
+            "PPLPHARMA": "PPLPHARMA.NS",
+        },
+    },
+    "Nifty Energy": {
+        "index": "^CNXENERGY",
+        "stocks": {
+            "RELIANCE": "RELIANCE.NS",
+            "NTPC": "NTPC.NS",
+            "POWERGRID": "POWERGRID.NS",
+            "ONGC": "ONGC.NS",
+            "BPCL": "BPCL.NS",
+            "IOC": "IOC.NS",
+            "GAIL": "GAIL.NS",
+            "TATAPOWER": "TATAPOWER.NS",
+            "ADANIGREEN": "ADANIGREEN.NS",
+            "ADANIENERGY": "ADANIENERGY.NS",
+        },
+    },
+    "Nifty Infrastructure": {
+        "index": "^CNXINFRA",
+        "stocks": {
+            "LT": "LT.NS",
+            "RELIANCE": "RELIANCE.NS",
+            "NTPC": "NTPC.NS",
+            "POWERGRID": "POWERGRID.NS",
+            "BHARTIARTL": "BHARTIARTL.NS",
+            "ULTRACEMCO": "ULTRACEMCO.NS",
+            "GRASIM": "GRASIM.NS",
+            "ONGC": "ONGC.NS",
+            "ADANIPORTS": "ADANIPORTS.NS",
+            "COALINDIA": "COALINDIA.NS",
+            "BPCL": "BPCL.NS",
+            "IOC": "IOC.NS",
+            "GAIL": "GAIL.NS",
+            "DLF": "DLF.NS",
+            "INDIGO": "INDIGO.NS",
+            "TATAPOWER": "TATAPOWER.NS",
+            "SIEMENS": "SIEMENS.NS",
+            "ABB": "ABB.NS",
+            "AMBUJACEM": "AMBUJACEM.NS",
+            "HAL": "HAL.NS",
+        },
+    },
+    "Nifty Commodities": {
+        "index": "^CNXCMDT",
+        "stocks": {
+            "RELIANCE": "RELIANCE.NS",
+            "TATASTEEL": "TATASTEEL.NS",
+            "JINDALSTEL": "JINDALSTEL.NS",
+            "JSWSTEEL": "JSWSTEEL.NS",
+            "HINDALCO": "HINDALCO.NS",
+            "VEDL": "VEDL.NS",
+            "ONGC": "ONGC.NS",
+            "COALINDIA": "COALINDIA.NS",
+            "NTPC": "NTPC.NS",
+            "POWERGRID": "POWERGRID.NS",
+            "ULTRACEMCO": "ULTRACEMCO.NS",
+            "GRASIM": "GRASIM.NS",
+            "BPCL": "BPCL.NS",
+            "IOC": "IOC.NS",
+            "GAIL": "GAIL.NS",
+            "AMBUJACEM": "AMBUJACEM.NS",
+            "ACC": "ACC.NS",
+            "SHREECEM": "SHREECEM.NS",
+            "PIDILITIND": "PIDILITIND.NS",
+            "UPL": "UPL.NS",
+        },
+    },
+    "Nifty Consumption": {
+        "index": "^CNXCONSUM",
+        "stocks": {
+            "ITC": "ITC.NS",
+            "HINDUNILVR": "HINDUNILVR.NS",
+            "BHARTIARTL": "BHARTIARTL.NS",
+            "MARUTI": "MARUTI.NS",
+            "M&M": "M&M.NS",
+            "TATAMOTORS": "TATAMOTORS.NS",
+            "TITAN": "TITAN.NS",
+            "NESTLEIND": "NESTLEIND.NS",
+            "BRITANNIA": "BRITANNIA.NS",
+            "TATACONSUM": "TATACONSUM.NS",
+            "GODREJCP": "GODREJCP.NS",
+            "DABUR": "DABUR.NS",
+            "MARICO": "MARICO.NS",
+            "COLPAL": "COLPAL.NS",
+            "VBL": "VBL.NS",
+            "APOLLOHOSP": "APOLLOHOSP.NS",
+            "TRENT": "TRENT.NS",
+            "EICHERMOT": "EICHERMOT.NS",
+            "HEROMOTOCO": "HEROMOTOCO.NS",
+            "TVSMOTOR": "TVSMOTOR.NS",
+        },
+    },
+    "Nifty PSE": {
+        "index": "^CNXPSE",
+        "stocks": {
+            "NTPC": "NTPC.NS",
+            "POWERGRID": "POWERGRID.NS",
+            "ONGC": "ONGC.NS",
+            "COALINDIA": "COALINDIA.NS",
+            "BPCL": "BPCL.NS",
+            "IOC": "IOC.NS",
+            "GAIL": "GAIL.NS",
+            "SBIN": "SBIN.NS",
+            "PFC": "PFC.NS",
+            "REC": "REC.NS",
+            "BEL": "BEL.NS",
+            "HAL": "HAL.NS",
+            "NHPC": "NHPC.NS",
+            "SJVN": "SJVN.NS",
+            "OIL": "OIL.NS",
+            "NMDC": "NMDC.NS",
+            "SAIL": "SAIL.NS",
+            "NATIONALUM": "NATIONALUM.NS",
+            "CONCOR": "CONCOR.NS",
+            "IRCTC": "IRCTC.NS",
         },
     },
 }
@@ -457,6 +786,16 @@ def render_rrg_chart(rrg_data_dict, title_text):
         "#EAB308",
         "#84CC16",
         "#F43F5E",
+        "#D97706",
+        "#059669",
+        "#2563EB",
+        "#7C3AED",
+        "#DB2777",
+        "#0284C7",
+        "#16A34A",
+        "#CA8A04",
+        "#DC2626",
+        "#4F46E5",
     ]
 
     for idx, (name, item_data) in enumerate(rrg_data_dict.items()):
@@ -714,7 +1053,6 @@ def render_styled_table(data_frame, col_name="Sector / Stock Name"):
 # FEATURE 1: ANIMATED RRG ROTATION GENERATOR
 # -------------------------------------------------------------------
 def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
-    # Find common date index across all sectors
     all_dates = None
     for item in sector_rrg_dict.values():
         df_m = item["metrics"]
@@ -747,9 +1085,18 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
         "#EAB308",
         "#84CC16",
         "#F43F5E",
+        "#D97706",
+        "#059669",
+        "#2563EB",
+        "#7C3AED",
+        "#DB2777",
+        "#0284C7",
+        "#16A34A",
+        "#CA8A04",
+        "#DC2626",
+        "#4F46E5",
     ]
 
-    # Initial frame data setup
     init_date = sorted_dates[0]
     fig = go.Figure()
 
@@ -771,7 +1118,6 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
                 )
             )
 
-    # Build Animation Frames
     frames = []
     for dt in sorted_dates:
         frame_data = []
@@ -780,7 +1126,6 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
             df = item["metrics"]
             color = colors[idx % len(colors)]
             if dt in df.index:
-                # Get historical tail up to dt
                 sub_df = df.loc[:dt].tail(4)
                 x_tail = sub_df["ratio"].values
                 y_tail = sub_df["momentum"].values
@@ -799,7 +1144,11 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
                     )
                 )
         frames.append(
-            go.Frame(data=frame_data, name=date_str, layout=dict(title=f"🎬 RRG Sector Rotation Date: {date_str}"))
+            go.Frame(
+                data=frame_data,
+                name=date_str,
+                layout=dict(title=f"🎬 RRG Sector Rotation Date: {date_str}"),
+            )
         )
 
     fig.frames = frames
@@ -928,15 +1277,11 @@ def render_pair_comparison(sec1_name, sec2_name, interval):
         st.error("Pair comparison data unavailable.")
         return
 
-    # Relative Pair Ratio = Sector 1 / Sector 2
     pair_ratio = (df_close[t1] / df_close[t2]) * 100
-    metrics = calculate_rrg_metrics(
-        pd.DataFrame({t1: df_close[t1]}), t1, BENCHMARK_SYMBOL
-    )
 
     c1, c2, c3 = st.columns(3)
-    c1.metric(f"Current Price ({sec1_name})", f"₹{df_close[t1].iloc[-1]:.2f}")
-    c2.metric(f"Current Price ({sec2_name})", f"₹{df_close[t2].iloc[-1]:.2f}")
+    c1.metric(f"Current Value ({sec1_name})", f"₹{df_close[t1].iloc[-1]:.2f}")
+    c2.metric(f"Current Value ({sec2_name})", f"₹{df_close[t2].iloc[-1]:.2f}")
 
     curr_pair_ratio = pair_ratio.iloc[-1]
     prev_pair_ratio = pair_ratio.iloc[-5] if len(pair_ratio) > 5 else curr_pair_ratio
@@ -958,7 +1303,6 @@ def render_pair_comparison(sec1_name, sec2_name, interval):
         )
     )
 
-    # 20-period Moving Average on Pair Ratio
     ma_pair = pair_ratio.rolling(20).mean()
     fig.add_trace(
         go.Scatter(
@@ -1003,16 +1347,14 @@ def generate_trade_setups(sector_rrg_data):
         curr_mom = metrics["momentum"].iloc[-1]
         quad_name, _, _, _ = get_quadrant(curr_ratio, curr_mom)
 
-        # LONG SETUP CONDITION:
-        # In Leading or Early Improving + Distance from 52W High <= 6% + Momentum > 99.5
         if (
             quad_name in ["Leading", "Improving"]
             and dist_52w <= 6.0
             and curr_mom >= 99.5
         ):
-            stop_loss = round(cmp * 0.96, 2)  # 4% trailing SL
-            target_1 = round(cmp * 1.08, 2)  # 8% T1
-            target_2 = round(cmp * 1.15, 2)  # 15% T2
+            stop_loss = round(cmp * 0.96, 2)
+            target_1 = round(cmp * 1.08, 2)
+            target_2 = round(cmp * 1.15, 2)
             long_setups.append({
                 "Sector": sec_name,
                 "Quadrant": quad_name,
@@ -1025,8 +1367,6 @@ def generate_trade_setups(sector_rrg_data):
                 "Risk Reward": "1 : 2.0",
             })
 
-        # SHORT / EXIT SETUP CONDITION:
-        # In Lagging Quadrant + Distance from High > 15% + Momentum < 99.5
         if quad_name == "Lagging" and dist_52w >= 12.0 and curr_mom < 99.5:
             stop_loss = round(cmp * 1.04, 2)
             target_1 = round(cmp * 0.92, 2)
@@ -1062,7 +1402,6 @@ def run_quadrant_backtest(sector_rrg_data):
         metrics["quadrant"] = quadrants
         metrics["price"] = prices.reindex(metrics.index)
 
-        # Detect transition into LEADING quadrant
         metrics["prev_quadrant"] = metrics["quadrant"].shift(1)
         transitions = metrics[
             (metrics["prev_quadrant"] == "Improving")
@@ -1118,7 +1457,7 @@ def run_quadrant_backtest(sector_rrg_data):
 # -------------------------------------------------------------------
 
 main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs([
-    "🌐 14 Primary NSE Sectors",
+    "🌐 All NSE Sectors",
     "🎯 Heavyweight Stock Drill-Down",
     "🎬 Animated RRG & Pair Matrix",
     "🤖 AI Trade Setups & Backtesting",
@@ -1134,9 +1473,9 @@ with st.spinner("Fetching Live Sector Market Data..."):
 
 # TAB 1: SECTORS RRG
 with main_tab1:
-    st.markdown("### 📊 14 NSE Sector Rotation vs Nifty 50")
+    st.markdown("### 📊 All NSE Sector Rotations vs Nifty 50")
     fig_sec, df_sec_summary = render_rrg_chart(
-        sector_rrg_data, "14 NSE Sectors Relative Rotation Graph"
+        sector_rrg_data, "All NSE Sectors Relative Rotation Graph"
     )
     st.plotly_chart(fig_sec, use_container_width=True)
 
