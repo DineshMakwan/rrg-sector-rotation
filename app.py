@@ -165,7 +165,7 @@ st.markdown(
 # FULL EXPANDED 23 SECTORS MAPPING WITH ALL CONSTITUENT STOCKS
 SECTOR_MAP = {
     "Nifty REITs & Realty": {
-        "index": "NIFTY_REITS_INVITS.NS",
+        "index": "^CNXREALTY",
         "stocks": {
             "ABREL": "ABREL.NS",
             "EMBASSY": "EMBASSY.NS",
@@ -176,7 +176,6 @@ SECTOR_MAP = {
             "OBEROIRLTY": "OBEROIRLTY.NS",
             "MINDSPACE": "MINDSPACE.NS",
             "BIRET": "BIRET.NS",
-            "KRT": "KRT.NS",
             "GODREJPROP": "GODREJPROP.NS",
             "DLF": "DLF.NS",
             "PHOENIXLTD": "PHOENIXLTD.NS",
@@ -185,18 +184,16 @@ SECTOR_MAP = {
         },
     },
     "Nifty Cement": {
-        "index": "NIFTY_CEMENT.NS",
+        "index": "^CNXCMDT",
         "stocks": {
             "STARCEMENT": "STARCEMENT.NS",
             "RAMCOCEM": "RAMCOCEM.NS",
             "JKLAKSHMI": "JKLAKSHMI.NS",
             "NUVOCO": "NUVOCO.NS",
-            "JSWCEMENT": "JSWCEMENT.NS",
             "AMBUJACEM": "AMBUJACEM.NS",
             "INDIACEM": "INDIACEM.NS",
             "ORIENTCEM": "ORIENTCEM.NS",
             "BIRLACORPN": "BIRLACORPN.NS",
-            "PRSMJOHNSN": "PRSMJOHNSN.NS",
             "ACC": "ACC.NS",
             "JKCEMENT": "JKCEMENT.NS",
             "DALBHARAT": "DALBHARAT.NS",
@@ -206,7 +203,7 @@ SECTOR_MAP = {
         },
     },
     "Nifty Chemicals": {
-        "index": "NIFTY_CHEMICALS.NS",
+        "index": "^CNXCMDT",
         "stocks": {
             "FLUOROCHEM": "FLUOROCHEM.NS",
             "SOLARINDS": "SOLARINDS.NS",
@@ -216,7 +213,6 @@ SECTOR_MAP = {
             "NAVINFLUOR": "NAVINFLUOR.NS",
             "PIIND": "PIIND.NS",
             "CHAMBLFERT": "CHAMBLFERT.NS",
-            "SWANCORP": "SWANCORP.NS",
             "PCBL": "PCBL.NS",
             "TATACHEM": "TATACHEM.NS",
             "SUMICHEM": "SUMICHEM.NS",
@@ -231,21 +227,17 @@ SECTOR_MAP = {
         },
     },
     "Nifty MidSmall Healthcare": {
-        "index": "NIFTY_MIDSML_HLTH.NS",
+        "index": "^CNXPHARMA",
         "stocks": {
             "NATCOPHARM": "NATCOPHARM.NS",
             "IPCALAB": "IPCALAB.NS",
-            "ONESOURCE": "ONESOURCE.NS",
             "AJANTPHARM": "AJANTPHARM.NS",
             "WOCKPHARMA": "WOCKPHARMA.NS",
-            "COHANCE": "COHANCE.NS",
             "PPLPHARMA": "PPLPHARMA.NS",
-            "ACUTAAS": "ACUTAAS.NS",
             "GLAND": "GLAND.NS",
             "MEDANTA": "MEDANTA.NS",
             "NEULANDLAB": "NEULANDLAB.NS",
             "GLENMARK": "GLENMARK.NS",
-            "SAILIFE": "SAILIFE.NS",
             "LALPATHLAB": "LALPATHLAB.NS",
             "ABBOTINDIA": "ABBOTINDIA.NS",
             "NH": "NH.NS",
@@ -266,10 +258,9 @@ SECTOR_MAP = {
         },
     },
     "Nifty Oil & Gas": {
-        "index": "NIFTY_OIL_AND_GAS.NS",
+        "index": "^CNXENERGY",
         "stocks": {
             "MGL": "MGL.NS",
-            "AEGISVOPAK": "AEGISVOPAK.NS",
             "AEGISLOG": "AEGISLOG.NS",
             "HINDPETRO": "HINDPETRO.NS",
             "IGL": "IGL.NS",
@@ -286,7 +277,7 @@ SECTOR_MAP = {
         },
     },
     "Nifty Consumer Durables": {
-        "index": "NIFTY_CONSR_DURBL.NS",
+        "index": "^CNXCONSUM",
         "stocks": {
             "BATAINDIA": "BATAINDIA.NS",
             "KAJARIACER": "KAJARIACER.NS",
@@ -295,7 +286,6 @@ SECTOR_MAP = {
             "WHIRLPOOL": "WHIRLPOOL.NS",
             "KALYANKJIL": "KALYANKJIL.NS",
             "HAVELLS": "HAVELLS.NS",
-            "LGEINDIA": "LGEINDIA.NS",
             "VOLTAS": "VOLTAS.NS",
             "CROMPTON": "CROMPTON.NS",
             "DIXON": "DIXON.NS",
@@ -304,7 +294,7 @@ SECTOR_MAP = {
         },
     },
     "Nifty Healthcare": {
-        "index": "NIFTY_HEALTHCARE.NS",
+        "index": "^CNXPHARMA",
         "stocks": {
             "IPCALAB": "IPCALAB.NS",
             "PPLPHARMA": "PPLPHARMA.NS",
@@ -329,7 +319,7 @@ SECTOR_MAP = {
         },
     },
     "Nifty Private Bank": {
-        "index": "NIFTY_PVT_BANK.NS",
+        "index": "^NSEBANK",
         "stocks": {
             "IDFCFIRSTB": "IDFCFIRSTB.NS",
             "KOTAKBANK": "KOTAKBANK.NS",
@@ -697,7 +687,10 @@ def calculate_rrg_metrics(data_df, item_ticker, bench_ticker, period_len=14):
 
 @st.cache_data(ttl=300)
 def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
-    all_tickers = list(items_dict.values()) + [benchmark_ticker_sym]
+    # Ensure benchmark tickers are included in download list
+    all_tickers = list(
+        set(list(items_dict.values()) + [benchmark_ticker_sym, BENCHMARK_SYMBOL])
+    )
     raw_data = yf.download(
         all_tickers, period="2y", interval=interval, progress=False
     )
@@ -706,30 +699,44 @@ def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
         df_close = raw_data["Close"]
         df_high = raw_data["High"]
     else:
-        df_close = raw_data[["Close"]]
-        df_high = raw_data[["High"]]
+        df_close = raw_data[["Close"]] if "Close" in raw_data else raw_data
+        df_high = raw_data[["High"]] if "High" in raw_data else raw_data
 
     if interval == "1wk":
         df_close = df_close.resample("W").last()
         df_high = df_high.resample("W").max()
 
+    # Benchmark Fallback Protection (If custom sector index fails, fallback to Nifty 50 ^NSEI)
+    active_benchmark = benchmark_ticker_sym
+    if (
+        active_benchmark not in df_close.columns
+        or df_close[active_benchmark].dropna().empty
+    ):
+        active_benchmark = BENCHMARK_SYMBOL
+
     rrg_results = {}
     for name, ticker in items_dict.items():
-        metrics = calculate_rrg_metrics(df_close, ticker, benchmark_ticker_sym)
+        if ticker not in df_close.columns or df_close[ticker].dropna().empty:
+            continue
+
+        metrics = calculate_rrg_metrics(df_close, ticker, active_benchmark)
         if metrics is not None and not metrics.empty:
-            if ticker in df_close.columns and ticker in df_high.columns:
-                cmp = df_close[ticker].dropna().iloc[-1]
-                high_52w = df_high[ticker].dropna().max()
-                dist_52w = ((high_52w - cmp) / high_52w) * 100
-            else:
-                cmp, high_52w, dist_52w = 0, 0, 0
+            cmp = df_close[ticker].dropna().iloc[-1]
+            high_52w = (
+                df_high[ticker].dropna().max()
+                if ticker in df_high.columns
+                else cmp
+            )
+            dist_52w = (
+                ((high_52w - cmp) / high_52w) * 100 if high_52w > 0 else 0
+            )
 
             rrg_results[name] = {
                 "metrics": metrics,
                 "prices": df_close[ticker].dropna(),
-                "cmp": round(cmp, 2),
-                "high_52w": round(high_52w, 2),
-                "dist_52w": round(dist_52w, 2),
+                "cmp": round(float(cmp), 2),
+                "high_52w": round(float(high_52w), 2),
+                "dist_52w": round(float(dist_52w), 2),
                 "ticker": ticker,
             }
 
@@ -1006,7 +1013,7 @@ def render_styled_table(data_frame, col_name="Sector / Stock Name"):
         or data_frame.empty
         or "Quadrant" not in data_frame.columns
     ):
-        st.info("No items currently in this quadrant.")
+        st.info("No items currently available in this category.")
         return
 
     rows = ""
@@ -1271,10 +1278,10 @@ def render_pair_comparison(sec1_name, sec2_name, interval):
     if isinstance(data.columns, pd.MultiIndex):
         df_close = data["Close"]
     else:
-        df_close = data[["Close"]]
+        df_close = data[["Close"]] if "Close" in data else data
 
     if t1 not in df_close.columns or t2 not in df_close.columns:
-        st.error("Pair comparison data unavailable.")
+        st.error("Pair comparison data unavailable for selected tickers.")
         return
 
     pair_ratio = (df_close[t1] / df_close[t2]) * 100
@@ -1284,7 +1291,9 @@ def render_pair_comparison(sec1_name, sec2_name, interval):
     c2.metric(f"Current Value ({sec2_name})", f"₹{df_close[t2].iloc[-1]:.2f}")
 
     curr_pair_ratio = pair_ratio.iloc[-1]
-    prev_pair_ratio = pair_ratio.iloc[-5] if len(pair_ratio) > 5 else curr_pair_ratio
+    prev_pair_ratio = (
+        pair_ratio.iloc[-5] if len(pair_ratio) > 5 else curr_pair_ratio
+    )
     pair_chg = ((curr_pair_ratio - prev_pair_ratio) / prev_pair_ratio) * 100
     c3.metric(
         f"Pair Strength ({sec1_name} / {sec2_name})",
@@ -1453,14 +1462,219 @@ def run_quadrant_backtest(sector_rrg_data):
 
 
 # -------------------------------------------------------------------
-# MAIN DASHBOARD NAVIGATION (4 INTEGRATED TABS)
+# FEATURE 5: SECTOR MONEY FLOW & ROLLOVER MATRIX MODULE
+# -------------------------------------------------------------------
+def calculate_sector_money_flow(sector_map):
+    """Fetches Price, Volume & OI Dynamics to calculate Sector Capital Inflow vs Outflow"""
+    flow_summary = []
+
+    for sec_name, sec_info in sector_map.items():
+        stocks = list(sec_info["stocks"].values())
+        if not stocks:
+            continue
+
+        try:
+            raw_data = yf.download(
+                stocks, period="5d", interval="1d", progress=False
+            )
+
+            if isinstance(raw_data.columns, pd.MultiIndex):
+                close_df = raw_data["Close"]
+                vol_df = raw_data["Volume"]
+            else:
+                close_df = (
+                    raw_data[["Close"]] if "Close" in raw_data else raw_data
+                )
+                vol_df = (
+                    raw_data[["Volume"]] if "Volume" in raw_data else raw_data
+                )
+
+            stock_scores = []
+            long_buildup_count = 0
+            short_buildup_count = 0
+            long_unwinding_count = 0
+            short_covering_count = 0
+
+            for tk in stocks:
+                if tk in close_df.columns and tk in vol_df.columns:
+                    p_series = close_df[tk].dropna()
+                    v_series = vol_df[tk].dropna()
+
+                    if len(p_series) >= 2 and len(v_series) >= 2:
+                        p_curr, p_prev = p_series.iloc[-1], p_series.iloc[-2]
+                        v_curr, v_prev = v_series.iloc[-1], v_series.iloc[-2]
+
+                        p_chg = ((p_curr - p_prev) / p_prev) * 100
+                        v_chg = (
+                            ((v_curr - v_prev) / (v_prev + 1e-6)) * 100
+                            if v_prev > 0
+                            else 0
+                        )
+
+                        # F&O Buildup Logic (Price + Volume/OI Expansion)
+                        if p_chg > 0 and v_chg > 0:
+                            long_buildup_count += 1
+                        elif p_chg < 0 and v_chg > 0:
+                            short_buildup_count += 1
+                        elif p_chg < 0 and v_chg <= 0:
+                            long_unwinding_count += 1
+                        else:
+                            short_covering_count += 1
+
+                        score = p_chg * (1 + (v_chg / 100))
+                        stock_scores.append(score)
+
+            if stock_scores:
+                avg_flow_score = round(float(np.mean(stock_scores)), 2)
+                total_stocks = len(stock_scores)
+
+                counts = {
+                    "Long Buildup 🟢": long_buildup_count,
+                    "Short Buildup 🔴": short_buildup_count,
+                    "Long Unwinding 🟡": long_unwinding_count,
+                    "Short Covering 🔵": short_covering_count,
+                }
+                dominant_state = max(counts, key=counts.get)
+
+                flow_summary.append({
+                    "Sector": sec_name,
+                    "Money Flow Score": avg_flow_score,
+                    "Dominant Buildup": dominant_state,
+                    "Long Buildup Stocks": f"{long_buildup_count}/{total_stocks}",
+                    "Short Buildup Stocks": f"{short_buildup_count}/{total_stocks}",
+                    "Long Unwinding Stocks": f"{long_unwinding_count}/{total_stocks}",
+                    "Short Covering Stocks": f"{short_covering_count}/{total_stocks}",
+                })
+        except Exception:
+            continue
+
+    df_res = pd.DataFrame(flow_summary)
+    if not df_res.empty:
+        df_res = df_res.sort_values(
+            by="Money Flow Score", ascending=False
+        ).reset_index(drop=True)
+    return df_res
+
+
+def render_money_flow_tab(sector_map):
+    st.markdown("### 💸 Sector Capital Inflow vs Outflow Tracker")
+    st.caption(
+        "Price Change aur Volume/OI Expansion ko combine karke bataayein ki kis sector mein **Naya Capital Aa Raha Hai** aur kahan se **Liquidation Ho Raha Hai**."
+    )
+
+    with st.spinner("Calculating Live Sector Money Flow & F&O Dynamics..."):
+        df_flow = calculate_sector_money_flow(sector_map)
+
+    if df_flow.empty:
+        st.warning("Data fetch karne me dikkat aayi. Please refresh karein.")
+        return
+
+    top_inflow = df_flow.iloc[0]
+    top_outflow = df_flow.iloc[-1]
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown(
+            f"""
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 15px; border-radius: 10px;">
+                <h4 style="color: #10b981; margin:0;">🚀 Highest Capital Inflow Sector</h4>
+                <h2 style="color: #ffffff; margin: 5px 0;">{top_inflow['Sector']}</h2>
+                <p style="margin:0; color: #9ca3af;">Money Flow Score: <b style="color:#10b981;">+{top_inflow['Money Flow Score']}</b> | Status: <b>{top_inflow['Dominant Buildup']}</b></p>
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    with col_b:
+        st.markdown(
+            f"""
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 10px;">
+                <h4 style="color: #ef4444; margin:0;">🔻 Highest Capital Outflow / Shorting</h4>
+                <h2 style="color: #ffffff; margin: 5px 0;">{top_outflow['Sector']}</h2>
+                <p style="margin:0; color: #9ca3af;">Money Flow Score: <b style="color:#ef4444;">{top_outflow['Money Flow Score']}</b> | Status: <b>{top_outflow['Dominant Buildup']}</b></p>
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # Bar Chart for Money Flow Scores
+    fig = go.Figure()
+    colors = [
+        "#10b981" if val >= 0 else "#ef4444"
+        for val in df_flow["Money Flow Score"]
+    ]
+
+    fig.add_trace(
+        go.Bar(
+            x=df_flow["Sector"],
+            y=df_flow["Money Flow Score"],
+            marker_color=colors,
+            text=df_flow["Money Flow Score"],
+            textposition="auto",
+        )
+    )
+
+    fig.update_layout(
+        title="📊 Sector Wise Net Money Flow Score (+Inflow / -Outflow)",
+        paper_bgcolor="#111827",
+        plot_bgcolor="#111827",
+        height=420,
+        xaxis=dict(gridcolor="#1F2937", color="#9CA3AF", tickangle=-45),
+        yaxis=dict(
+            title="Money Flow Score", gridcolor="#1F2937", color="#9CA3AF"
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("📋 Sector Open Interest & Buildup Breakdown Table")
+    rows = ""
+    for _, row in df_flow.iterrows():
+        b_class = "bg-leading" if row["Money Flow Score"] >= 0 else "bg-lagging"
+        rows += f"""
+        <tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
+            <td style="padding:12px 16px; font-weight:600;">{row['Sector']}</td>
+            <td style="padding:12px 16px; font-weight:700;"><span class="status-badge {b_class}">{row['Money Flow Score']}</span></td>
+            <td style="padding:12px 16px; font-weight:600;">{row['Dominant Buildup']}</td>
+            <td style="padding:12px 16px; color:#10b981;">{row['Long Buildup Stocks']}</td>
+            <td style="padding:12px 16px; color:#ef4444;">{row['Short Buildup Stocks']}</td>
+            <td style="padding:12px 16px; color:#f59e0b;">{row['Long Unwinding Stocks']}</td>
+            <td style="padding:12px 16px; color:#3b82f6;">{row['Short Covering Stocks']}</td>
+        </tr>
+        """
+
+    table_html = f"""
+    <table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
+        <thead>
+            <tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
+                <th style="padding:12px 16px;">Sector Name</th>
+                <th style="padding:12px 16px;">Flow Score</th>
+                <th style="padding:12px 16px;">Dominant Buildup</th>
+                <th style="padding:12px 16px;">Long Buildup 🟢</th>
+                <th style="padding:12px 16px;">Short Buildup 🔴</th>
+                <th style="padding:12px 16px;">Long Unwinding 🟡</th>
+                <th style="padding:12px 16px;">Short Covering 🔵</th>
+            </tr>
+        </thead>
+        <tbody>
+            {rows}
+        </tbody>
+    </table>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
+# -------------------------------------------------------------------
+# MAIN DASHBOARD NAVIGATION (5 INTEGRATED TABS)
 # -------------------------------------------------------------------
 
-main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs([
+main_tab1, main_tab2, main_tab3, main_tab4, main_tab5 = st.tabs([
     "🌐 All NSE Sectors",
     "🎯 Heavyweight Stock Drill-Down",
     "🎬 Animated RRG & Pair Matrix",
     "🤖 AI Trade Setups & Backtesting",
+    "💸 Sector Money Flow & Rollover Matrix",
 ])
 
 # Fetch Sector Data
@@ -1520,7 +1734,7 @@ with main_tab1:
         )
 
 
-# TAB 2: STOCK DRILL-DOWN RRG
+# TAB 2: STOCK DRILL-DOWN RRG (FIXED BUG & FULL DATA RENDERING)
 with main_tab2:
     st.markdown(
         f"### 🎯 Stock Drill-Down Analysis: <span style='color:#38bdf8;'>{selected_sector_for_stocks}</span>",
@@ -1540,7 +1754,7 @@ with main_tab2:
 
     fig_stock, df_stock_summary = render_rrg_chart(
         stock_rrg_data,
-        f"{selected_sector_for_stocks} Top Stocks vs Parent Sector Index",
+        f"{selected_sector_for_stocks} Top Stocks vs Sector Index/Benchmark",
     )
     st.plotly_chart(fig_stock, use_container_width=True)
 
@@ -1600,8 +1814,14 @@ with main_tab3:
     )
 
     col1, col2 = st.columns(2)
-    s1 = col1.selectbox("Base Sector (Numerator)", options=list(SECTOR_MAP.keys()), index=0)
-    s2 = col2.selectbox("Benchmark Sector (Denominator)", options=list(SECTOR_MAP.keys()), index=1)
+    s1 = col1.selectbox(
+        "Base Sector (Numerator)", options=list(SECTOR_MAP.keys()), index=0
+    )
+    s2 = col2.selectbox(
+        "Benchmark Sector (Denominator)",
+        options=list(SECTOR_MAP.keys()),
+        index=1,
+    )
 
     if s1 == s2:
         st.warning("Please select two different sectors to compare.")
@@ -1641,9 +1861,7 @@ with main_tab4:
                 )
 
     with c_short:
-        st.markdown(
-            "#### 🔻 Bearish / Exit Warning Setups (Lagging Quadrant)"
-        )
+        st.markdown("#### 🔻 Bearish / Exit Warning Setups (Lagging Quadrant)")
         if not short_ideas:
             st.info("No high-risk short/exit setups detected.")
         else:
@@ -1671,6 +1889,11 @@ with main_tab4:
         st.info("Calculating backtest metrics...")
     else:
         st.dataframe(backtest_df, use_container_width=True, hide_index=True)
+
+
+# TAB 5: SECTOR MONEY FLOW & ROLLOVER MATRIX
+with main_tab5:
+    render_money_flow_tab(SECTOR_MAP)
 
 
 # Footer Branding
