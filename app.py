@@ -668,12 +668,42 @@ selected_sector_for_stocks = st.sidebar.selectbox(
 )
 
 
+# Safe DataFrame extraction helper for yfinance output
+def extract_field_df(raw_data, field_name="Close"):
+    if raw_data.empty:
+        return pd.DataFrame()
+
+    if isinstance(raw_data.columns, pd.MultiIndex):
+        if field_name in raw_data.columns.levels[0]:
+            return raw_data[field_name].copy()
+        else:
+            return pd.DataFrame()
+    else:
+        if field_name in raw_data.columns:
+            return raw_data[[field_name]].copy()
+        elif len(raw_data.columns) == 1:
+            df = raw_data.copy()
+            df.columns = [field_name]
+            return df
+        return raw_data.copy()
+
+
 # RRG Metric Calculation Engine
 def calculate_rrg_metrics(data_df, item_ticker, bench_ticker, period_len=14):
     if item_ticker not in data_df.columns or bench_ticker not in data_df.columns:
         return None
 
-    rs = (data_df[item_ticker] / data_df[bench_ticker]) * 100
+    s_item = data_df[item_ticker].dropna()
+    s_bench = data_df[bench_ticker].dropna()
+
+    combined = pd.concat([s_item, s_bench], axis=1, join="inner").dropna()
+    if len(combined) < (period_len * 2):
+        return None
+
+    item_series = combined.iloc[:, 0]
+    bench_series = combined.iloc[:, 1]
+
+    rs = (item_series / bench_series) * 100
     rs_mean = rs.rolling(window=period_len).mean()
     rs_std = rs.rolling(window=period_len).std()
     rs_ratio = 100 + ((rs - rs_mean) / (rs_std + 1e-6)) * 10
@@ -687,7 +717,6 @@ def calculate_rrg_metrics(data_df, item_ticker, bench_ticker, period_len=14):
 
 @st.cache_data(ttl=300)
 def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
-    # Ensure benchmark tickers are included in download list
     all_tickers = list(
         set(list(items_dict.values()) + [benchmark_ticker_sym, BENCHMARK_SYMBOL])
     )
@@ -695,18 +724,21 @@ def fetch_and_build_rrg(items_dict, benchmark_ticker_sym, interval):
         all_tickers, period="2y", interval=interval, progress=False
     )
 
-    if isinstance(raw_data.columns, pd.MultiIndex):
-        df_close = raw_data["Close"]
-        df_high = raw_data["High"]
-    else:
-        df_close = raw_data[["Close"]] if "Close" in raw_data else raw_data
-        df_high = raw_data[["High"]] if "High" in raw_data else raw_data
+    if raw_data.empty:
+        return {}
+
+    df_close = extract_field_df(raw_data, "Close")
+    df_high = extract_field_df(raw_data, "High")
+
+    if not isinstance(df_close.index, pd.DatetimeIndex):
+        df_close.index = pd.to_datetime(df_close.index)
+    if not isinstance(df_high.index, pd.DatetimeIndex):
+        df_high.index = pd.to_datetime(df_high.index)
 
     if interval == "1wk":
         df_close = df_close.resample("W").last()
         df_high = df_high.resample("W").max()
 
-    # Benchmark Fallback Protection (If custom sector index fails, fallback to Nifty 50 ^NSEI)
     active_benchmark = benchmark_ticker_sym
     if (
         active_benchmark not in df_close.columns
@@ -775,34 +807,29 @@ def get_quadrant(ratio, momentum):
 
 def render_rrg_chart(rrg_data_dict, title_text):
     fig = go.Figure()
-    min_x, max_x, min_y, max_y = 98, 102, 98, 102
+    min_x, max_x, min_y, max_y = 98.0, 102.0, 98.0, 102.0
     summary_list = []
 
+    columns_list = [
+        "Name",
+        "RS-Ratio",
+        "RS-Momentum",
+        "Quadrant",
+        "Status",
+        "BadgeClass",
+        "Trend",
+        "CMP",
+        "52W High",
+        "Dist 52W High (%)",
+        "Near 52W High",
+        "NearBadgeClass",
+    ]
+
     colors = [
-        "#10B981",
-        "#3B82F6",
-        "#EF4444",
-        "#F59E0B",
-        "#8B5CF6",
-        "#EC4899",
-        "#14B8A6",
-        "#F97316",
-        "#6366F1",
-        "#06B6D4",
-        "#A855F7",
-        "#EAB308",
-        "#84CC16",
-        "#F43F5E",
-        "#D97706",
-        "#059669",
-        "#2563EB",
-        "#7C3AED",
-        "#DB2777",
-        "#0284C7",
-        "#16A34A",
-        "#CA8A04",
-        "#DC2626",
-        "#4F46E5",
+        "#10B981", "#3B82F6", "#EF4444", "#F59E0B", "#8B5CF6", "#EC4899",
+        "#14B8A6", "#F97316", "#6366F1", "#06B6D4", "#A855F7", "#EAB308",
+        "#84CC16", "#F43F5E", "#D97706", "#059669", "#2563EB", "#7C3AED",
+        "#DB2777", "#0284C7", "#16A34A", "#CA8A04", "#DC2626", "#4F46E5"
     ]
 
     for idx, (name, item_data) in enumerate(rrg_data_dict.items()):
@@ -836,8 +863,8 @@ def render_rrg_chart(rrg_data_dict, title_text):
 
         summary_list.append({
             "Name": name,
-            "RS-Ratio": round(head_x, 2),
-            "RS-Momentum": round(head_y, 2),
+            "RS-Ratio": round(float(head_x), 2),
+            "RS-Momentum": round(float(head_y), 2),
             "Quadrant": quad_name,
             "Status": desc,
             "BadgeClass": badge_cls,
@@ -902,124 +929,67 @@ def render_rrg_chart(rrg_data_dict, title_text):
         shapes=[
             dict(
                 type="rect",
-                x0=100,
-                x1=x_range[1],
-                y0=100,
-                y1=y_range[1],
-                fillcolor="rgba(16, 185, 129, 0.08)",
-                line_width=0,
-                layer="below",
+                x0=100, x1=x_range[1], y0=100, y1=y_range[1],
+                fillcolor="rgba(16, 185, 129, 0.08)", line_width=0, layer="below"
             ),
             dict(
                 type="rect",
-                x0=100,
-                x1=x_range[1],
-                y0=y_range[0],
-                y1=100,
-                fillcolor="rgba(245, 158, 11, 0.08)",
-                line_width=0,
-                layer="below",
+                x0=100, x1=x_range[1], y0=y_range[0], y1=100,
+                fillcolor="rgba(245, 158, 11, 0.08)", line_width=0, layer="below"
             ),
             dict(
                 type="rect",
-                x0=x_range[0],
-                x1=100,
-                y0=y_range[0],
-                y1=100,
-                fillcolor="rgba(239, 68, 68, 0.08)",
-                line_width=0,
-                layer="below",
+                x0=x_range[0], x1=100, y0=y_range[0], y1=100,
+                fillcolor="rgba(239, 68, 68, 0.08)", line_width=0, layer="below"
             ),
             dict(
                 type="rect",
-                x0=x_range[0],
-                x1=100,
-                y0=100,
-                y1=y_range[1],
-                fillcolor="rgba(59, 130, 246, 0.08)",
-                line_width=0,
-                layer="below",
+                x0=x_range[0], x1=100, y0=100, y1=y_range[1],
+                fillcolor="rgba(59, 130, 246, 0.08)", line_width=0, layer="below"
             ),
             dict(
                 type="line",
-                x0=100,
-                x1=100,
-                y0=y_range[0],
-                y1=y_range[1],
+                x0=100, x1=100, y0=y_range[0], y1=y_range[1],
                 line=dict(color="#4B5563", width=1.5, dash="dash"),
             ),
             dict(
                 type="line",
-                x0=x_range[0],
-                x1=x_range[1],
-                y0=100,
-                y1=100,
+                x0=x_range[0], x1=x_range[1], y0=100, y1=100,
                 line=dict(color="#4B5563", width=1.5, dash="dash"),
             ),
         ],
         annotations=[
             dict(
-                x=(100 + x_range[1]) / 2,
-                y=(100 + y_range[1]) / 2,
-                text="<b>LEADING</b>",
-                showarrow=False,
-                font=dict(color="rgba(16, 185, 129, 0.3)", size=24),
+                x=(100 + x_range[1]) / 2, y=(100 + y_range[1]) / 2,
+                text="<b>LEADING</b>", showarrow=False, font=dict(color="rgba(16, 185, 129, 0.3)", size=24)
             ),
             dict(
-                x=(100 + x_range[1]) / 2,
-                y=(100 + y_range[0]) / 2,
-                text="<b>WEAKENING</b>",
-                showarrow=False,
-                font=dict(color="rgba(245, 158, 11, 0.3)", size=24),
+                x=(100 + x_range[1]) / 2, y=(100 + y_range[0]) / 2,
+                text="<b>WEAKENING</b>", showarrow=False, font=dict(color="rgba(245, 158, 11, 0.3)", size=24)
             ),
             dict(
-                x=(100 + x_range[0]) / 2,
-                y=(100 + y_range[0]) / 2,
-                text="<b>LAGGING</b>",
-                showarrow=False,
-                font=dict(color="rgba(239, 68, 68, 0.3)", size=24),
+                x=(100 + x_range[0]) / 2, y=(100 + y_range[0]) / 2,
+                text="<b>LAGGING</b>", showarrow=False, font=dict(color="rgba(239, 68, 68, 0.3)", size=24)
             ),
             dict(
-                x=(100 + x_range[0]) / 2,
-                y=(100 + y_range[1]) / 2,
-                text="<b>IMPROVING</b>",
-                showarrow=False,
-                font=dict(color="rgba(59, 130, 246, 0.3)", size=24),
+                x=(100 + x_range[0]) / 2, y=(100 + y_range[1]) / 2,
+                text="<b>IMPROVING</b>", showarrow=False, font=dict(color="rgba(59, 130, 246, 0.3)", size=24)
             ),
         ],
     )
 
-    columns_list = [
-        "Name",
-        "RS-Ratio",
-        "RS-Momentum",
-        "Quadrant",
-        "Status",
-        "BadgeClass",
-        "Trend",
-        "CMP",
-        "52W High",
-        "Dist 52W High (%)",
-        "Near 52W High",
-        "NearBadgeClass",
-    ]
     summary_df = pd.DataFrame(summary_list, columns=columns_list)
     return fig, summary_df
 
 
 def render_styled_table(data_frame, col_name="Sector / Stock Name"):
-    if (
-        data_frame is None
-        or data_frame.empty
-        or "Quadrant" not in data_frame.columns
-    ):
+    if data_frame is None or data_frame.empty or "Quadrant" not in data_frame.columns:
         st.info("No items currently available in this category.")
         return
 
     rows = ""
     for _, row in data_frame.iterrows():
-        rows += f"""
-<tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
+        rows += f"""<tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
 <td style="padding:12px 16px; font-weight:600;">{row['Name']}</td>
 <td style="padding:12px 16px;"><span class="status-badge {row['BadgeClass']}">{row['Quadrant']}</span></td>
 <td style="padding:12px 16px; font-weight:500;">{row['RS-Ratio']}</td>
@@ -1029,11 +999,9 @@ def render_styled_table(data_frame, col_name="Sector / Stock Name"):
 <td style="padding:12px 16px; font-weight:600; color:#f3f4f6;">₹{row['52W High']}</td>
 <td style="padding:12px 16px; font-weight:600;">{row['Dist 52W High (%)']}%</td>
 <td style="padding:12px 16px;"><span class="status-badge {row['NearBadgeClass']}">{row['Near 52W High']}</span></td>
-</tr>
-"""
+</tr>"""
 
-    table_html = f"""
-<table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
+    table_html = f"""<table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
 <thead>
 <tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
 <th style="padding:12px 16px;">{col_name}</th>
@@ -1050,16 +1018,19 @@ def render_styled_table(data_frame, col_name="Sector / Stock Name"):
 <tbody>
 {rows}
 </tbody>
-</table>
-"""
-    clean_html = "\n".join([line.strip() for line in table_html.split("\n")])
-    st.markdown(clean_html, unsafe_allow_html=True)
+</table>"""
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
 
 # -------------------------------------------------------------------
 # FEATURE 1: ANIMATED RRG ROTATION GENERATOR
 # -------------------------------------------------------------------
 def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
+    if not sector_rrg_dict:
+        st.warning("No sector data available for animation.")
+        return
+
     all_dates = None
     for item in sector_rrg_dict.values():
         df_m = item["metrics"]
@@ -1078,30 +1049,10 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
         return
 
     colors = [
-        "#10B981",
-        "#3B82F6",
-        "#EF4444",
-        "#F59E0B",
-        "#8B5CF6",
-        "#EC4899",
-        "#14B8A6",
-        "#F97316",
-        "#6366F1",
-        "#06B6D4",
-        "#A855F7",
-        "#EAB308",
-        "#84CC16",
-        "#F43F5E",
-        "#D97706",
-        "#059669",
-        "#2563EB",
-        "#7C3AED",
-        "#DB2777",
-        "#0284C7",
-        "#16A34A",
-        "#CA8A04",
-        "#DC2626",
-        "#4F46E5",
+        "#10B981", "#3B82F6", "#EF4444", "#F59E0B", "#8B5CF6", "#EC4899",
+        "#14B8A6", "#F97316", "#6366F1", "#06B6D4", "#A855F7", "#EAB308",
+        "#84CC16", "#F43F5E", "#D97706", "#059669", "#2563EB", "#7C3AED",
+        "#DB2777", "#0284C7", "#16A34A", "#CA8A04", "#DC2626", "#4F46E5"
     ]
 
     init_date = sorted_dates[0]
@@ -1134,19 +1085,22 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
             color = colors[idx % len(colors)]
             if dt in df.index:
                 sub_df = df.loc[:dt].tail(4)
+                if sub_df.empty:
+                    continue
                 x_tail = sub_df["ratio"].values
                 y_tail = sub_df["momentum"].values
+                labels = [""] * (len(x_tail) - 1) + [name] if len(x_tail) > 0 else []
+                markers = [6] * (len(x_tail) - 1) + [12] if len(x_tail) > 0 else []
+                
                 frame_data.append(
                     go.Scatter(
                         x=x_tail,
                         y=y_tail,
                         mode="lines+markers+text",
                         name=name,
-                        text=[""] * (len(x_tail) - 1) + [name],
+                        text=labels,
                         textposition="top center",
-                        marker=dict(
-                            size=[6] * (len(x_tail) - 1) + [12], color=color
-                        ),
+                        marker=dict(size=markers, color=color),
                         line=dict(color=color, width=2),
                     )
                 )
@@ -1180,18 +1134,12 @@ def render_animated_rrg(sector_rrg_dict, lookback_periods=12):
         shapes=[
             dict(
                 type="line",
-                x0=100,
-                x1=100,
-                y0=90,
-                y1=110,
+                x0=100, x1=100, y0=90, y1=110,
                 line=dict(color="#4B5563", width=1.5, dash="dash"),
             ),
             dict(
                 type="line",
-                x0=90,
-                x1=110,
-                y0=100,
-                y1=100,
+                x0=90, x1=110, y0=100, y1=100,
                 line=dict(color="#4B5563", width=1.5, dash="dash"),
             ),
         ],
@@ -1275,26 +1223,30 @@ def render_pair_comparison(sec1_name, sec2_name, interval):
         interval=interval,
         progress=False,
     )
-    if isinstance(data.columns, pd.MultiIndex):
-        df_close = data["Close"]
-    else:
-        df_close = data[["Close"]] if "Close" in data else data
+    if data.empty:
+        st.error("Pair comparison data unavailable.")
+        return
+
+    df_close = extract_field_df(data, "Close")
 
     if t1 not in df_close.columns or t2 not in df_close.columns:
         st.error("Pair comparison data unavailable for selected tickers.")
         return
 
-    pair_ratio = (df_close[t1] / df_close[t2]) * 100
+    pair_ratio = (df_close[t1] / df_close[t2]).dropna() * 100
+    if pair_ratio.empty:
+        st.error("Insufficient overlapping data for pair comparison.")
+        return
 
     c1, c2, c3 = st.columns(3)
-    c1.metric(f"Current Value ({sec1_name})", f"₹{df_close[t1].iloc[-1]:.2f}")
-    c2.metric(f"Current Value ({sec2_name})", f"₹{df_close[t2].iloc[-1]:.2f}")
+    c1.metric(f"Current Value ({sec1_name})", f"₹{df_close[t1].dropna().iloc[-1]:.2f}")
+    c2.metric(f"Current Value ({sec2_name})", f"₹{df_close[t2].dropna().iloc[-1]:.2f}")
 
     curr_pair_ratio = pair_ratio.iloc[-1]
     prev_pair_ratio = (
         pair_ratio.iloc[-5] if len(pair_ratio) > 5 else curr_pair_ratio
     )
-    pair_chg = ((curr_pair_ratio - prev_pair_ratio) / prev_pair_ratio) * 100
+    pair_chg = ((curr_pair_ratio - prev_pair_ratio) / (prev_pair_ratio + 1e-6)) * 100
     c3.metric(
         f"Pair Strength ({sec1_name} / {sec2_name})",
         f"{curr_pair_ratio:.2f}",
@@ -1397,7 +1349,7 @@ def run_quadrant_backtest(sector_rrg_data):
     results = []
 
     for sec_name, data in sector_rrg_data.items():
-        metrics = data["metrics"]
+        metrics = data["metrics"].copy()
         prices = data["prices"]
 
         if metrics.empty or len(prices) < 50:
@@ -1453,9 +1405,9 @@ def run_quadrant_backtest(sector_rrg_data):
             results.append({
                 "Sector": sec_name,
                 "Signals Count": total_trades,
-                "Avg 5-Period Return (%)": round(avg_5d, 2),
-                "Avg 10-Period Return (%)": round(avg_10d, 2),
-                "Win Rate (10P) (%)": f"{round(win_rate, 1)}%",
+                "Avg 5-Period Return (%)": round(float(avg_5d), 2),
+                "Avg 10-Period Return (%)": round(float(avg_10d), 2),
+                "Win Rate (10P) (%)": f"{round(float(win_rate), 1)}%",
             })
 
     return pd.DataFrame(results)
@@ -1465,7 +1417,7 @@ def run_quadrant_backtest(sector_rrg_data):
 # FEATURE 5: SECTOR MONEY FLOW & ROLLOVER MATRIX MODULE
 # -------------------------------------------------------------------
 def calculate_sector_money_flow(sector_map):
-    """Fetches Price, Volume & OI Dynamics to calculate Sector Capital Inflow vs Outflow"""
+    """Fetches Price & Volume Dynamics to calculate Sector Capital Inflow vs Outflow"""
     flow_summary = []
 
     for sec_name, sec_info in sector_map.items():
@@ -1478,16 +1430,11 @@ def calculate_sector_money_flow(sector_map):
                 stocks, period="5d", interval="1d", progress=False
             )
 
-            if isinstance(raw_data.columns, pd.MultiIndex):
-                close_df = raw_data["Close"]
-                vol_df = raw_data["Volume"]
-            else:
-                close_df = (
-                    raw_data[["Close"]] if "Close" in raw_data else raw_data
-                )
-                vol_df = (
-                    raw_data[["Volume"]] if "Volume" in raw_data else raw_data
-                )
+            if raw_data.empty:
+                continue
+
+            close_df = extract_field_df(raw_data, "Close")
+            vol_df = extract_field_df(raw_data, "Volume")
 
             stock_scores = []
             long_buildup_count = 0
@@ -1504,14 +1451,14 @@ def calculate_sector_money_flow(sector_map):
                         p_curr, p_prev = p_series.iloc[-1], p_series.iloc[-2]
                         v_curr, v_prev = v_series.iloc[-1], v_series.iloc[-2]
 
-                        p_chg = ((p_curr - p_prev) / p_prev) * 100
+                        p_chg = ((p_curr - p_prev) / (p_prev + 1e-6)) * 100
                         v_chg = (
                             ((v_curr - v_prev) / (v_prev + 1e-6)) * 100
                             if v_prev > 0
                             else 0
                         )
 
-                        # F&O Buildup Logic (Price + Volume/OI Expansion)
+                        # Buildup Logic (Price + Volume Expansion)
                         if p_chg > 0 and v_chg > 0:
                             long_buildup_count += 1
                         elif p_chg < 0 and v_chg > 0:
@@ -1632,36 +1579,33 @@ def render_money_flow_tab(sector_map):
     rows = ""
     for _, row in df_flow.iterrows():
         b_class = "bg-leading" if row["Money Flow Score"] >= 0 else "bg-lagging"
-        rows += f"""
-        <tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
-            <td style="padding:12px 16px; font-weight:600;">{row['Sector']}</td>
-            <td style="padding:12px 16px; font-weight:700;"><span class="status-badge {b_class}">{row['Money Flow Score']}</span></td>
-            <td style="padding:12px 16px; font-weight:600;">{row['Dominant Buildup']}</td>
-            <td style="padding:12px 16px; color:#10b981;">{row['Long Buildup Stocks']}</td>
-            <td style="padding:12px 16px; color:#ef4444;">{row['Short Buildup Stocks']}</td>
-            <td style="padding:12px 16px; color:#f59e0b;">{row['Long Unwinding Stocks']}</td>
-            <td style="padding:12px 16px; color:#3b82f6;">{row['Short Covering Stocks']}</td>
-        </tr>
-        """
+        rows += f"""<tr style="border-bottom: 1px solid #1f2937; color:#f3f4f6; font-size:0.9rem;">
+<td style="padding:12px 16px; font-weight:600;">{row['Sector']}</td>
+<td style="padding:12px 16px; font-weight:700;"><span class="status-badge {b_class}">{row['Money Flow Score']}</span></td>
+<td style="padding:12px 16px; font-weight:600;">{row['Dominant Buildup']}</td>
+<td style="padding:12px 16px; color:#10b981;">{row['Long Buildup Stocks']}</td>
+<td style="padding:12px 16px; color:#ef4444;">{row['Short Buildup Stocks']}</td>
+<td style="padding:12px 16px; color:#f59e0b;">{row['Long Unwinding Stocks']}</td>
+<td style="padding:12px 16px; color:#3b82f6;">{row['Short Covering Stocks']}</td>
+</tr>"""
 
-    table_html = f"""
-    <table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
-        <thead>
-            <tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
-                <th style="padding:12px 16px;">Sector Name</th>
-                <th style="padding:12px 16px;">Flow Score</th>
-                <th style="padding:12px 16px;">Dominant Buildup</th>
-                <th style="padding:12px 16px;">Long Buildup 🟢</th>
-                <th style="padding:12px 16px;">Short Buildup 🔴</th>
-                <th style="padding:12px 16px;">Long Unwinding 🟡</th>
-                <th style="padding:12px 16px;">Short Covering 🔵</th>
-            </tr>
-        </thead>
-        <tbody>
-            {rows}
-        </tbody>
-    </table>
-    """
+    table_html = f"""<table style="width:100%; border-collapse:collapse; background-color:#111827; border-radius:8px; overflow:hidden; margin-top:10px;">
+<thead>
+<tr style="background-color:#1f2937; text-align:left; color:#9ca3af; font-size:0.9rem;">
+<th style="padding:12px 16px;">Sector Name</th>
+<th style="padding:12px 16px;">Flow Score</th>
+<th style="padding:12px 16px;">Dominant Buildup</th>
+<th style="padding:12px 16px;">Long Buildup 🟢</th>
+<th style="padding:12px 16px;">Short Buildup 🔴</th>
+<th style="padding:12px 16px;">Long Unwinding 🟡</th>
+<th style="padding:12px 16px;">Short Covering 🔵</th>
+</tr>
+</thead>
+<tbody>
+{rows}
+</tbody>
+</table>"""
+
     st.markdown(table_html, unsafe_allow_html=True)
 
 
@@ -1734,7 +1678,7 @@ with main_tab1:
         )
 
 
-# TAB 2: STOCK DRILL-DOWN RRG (FIXED BUG & FULL DATA RENDERING)
+# TAB 2: STOCK DRILL-DOWN RRG
 with main_tab2:
     st.markdown(
         f"### 🎯 Stock Drill-Down Analysis: <span style='color:#38bdf8;'>{selected_sector_for_stocks}</span>",
